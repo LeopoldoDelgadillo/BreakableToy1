@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class InventoryProduct {
-    private final String category;
     private String name;
+    private final String category;
     private int unitPrice;
     private int stock;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -24,9 +24,10 @@ public class InventoryProduct {
     private LocalDateTime updateDate;
     private final String id;
 
-    public InventoryProduct(String category, String name, int unitPrice, int stock, String expirationDate, LocalDateTime creationDate, LocalDateTime updateDate, String id){
-        this.category = category;
+    public InventoryProduct(String name, String category, int unitPrice, int stock,
+                            String expirationDate, LocalDateTime creationDate, LocalDateTime updateDate, String id){
         this.name = name;
+        this.category = category;
         this.unitPrice = unitPrice;
         this.stock = stock;
         this.expirationDate = LocalDateTime.parse(expirationDate);
@@ -35,13 +36,9 @@ public class InventoryProduct {
         this.id = id;
     }
 
-    @ConstructorProperties({"category","name","unitPrice","stock","expirationDate"})
-    public InventoryProduct(String category, String name, int unitPrice, int stock, String expirationDate){
-        this(category, name, unitPrice, stock, expirationDate, LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID().toString());
-    }
-
-    public String getCategory(){
-        return category;
+    @ConstructorProperties({"name","category","unitPrice","stock","expirationDate"})
+    public InventoryProduct(String name, String category, int unitPrice, int stock, String expirationDate){
+        this(name, category, unitPrice, stock, expirationDate, LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID().toString());
     }
 
     public String getName(){
@@ -49,6 +46,10 @@ public class InventoryProduct {
     }
     public void setName(String name){
         this.name = name;
+    }
+
+    public String getCategory(){
+        return category;
     }
 
     public int getUnitPrice(){

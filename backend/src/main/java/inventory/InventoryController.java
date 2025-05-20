@@ -1,19 +1,26 @@
 package inventory;
 
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/products")
 public class InventoryController{
-    InventoryRepository repo = new InventoryRepository();
+
+    private InventoryService repo = new InventoryService();
 
     @GetMapping()
-    public List<InventoryProduct> getList(){
-        return repo.getInventoryList();
+    public PagedListHolder<InventoryProduct> getList(@RequestParam int page,
+                                                     @RequestParam(required = false) String sort){
+        PagedListHolder<InventoryProduct> listHolder = new PagedListHolder<>(repo.getInventoryList());
+        MutableSortDefinition x = new MutableSortDefinition (sort, true, true);
+        listHolder.setSort(x);
+        listHolder.resort();
+        listHolder.setPageSize(10);
+        listHolder.setPage(page);
+        return listHolder;
     }
 
     @PostMapping()
@@ -27,31 +34,34 @@ public class InventoryController{
     public InventoryProduct putInventoryProduct(@PathVariable String id, @RequestBody InventoryProduct product) {
         InventoryProduct newProduct;
         try {
-            newProduct = new InventoryProduct(product.getCategory(), product.getName(), product.getUnitPrice(), product.getStock(), product.getExpirationDate().toString(), repo.getProduct(id).getCreationDate(), LocalDateTime.now(), id);
+            newProduct = new InventoryProduct(product.getCategory(), product.getName(),
+                                              product.getUnitPrice(), product.getStock(),
+                                              product.getExpirationDate().toString(),
+                                              repo.getProduct(id).getCreationDate(), LocalDateTime.now(), id);
             repo.editProduct(id, newProduct);
+            return newProduct;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return newProduct;
     }
 
     @PostMapping("/{id}/outofstock")
     public InventoryProduct putProductOOS(@PathVariable String id){
         try{
             repo.editProduct(id,repo.editProductStock(id,0));
+            return repo.getProduct(id);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return repo.getProduct(id);
     }
 
     @PostMapping("/{id}/instock")
     public InventoryProduct putProductIS(@PathVariable String id){
         try{
             repo.editProduct(id,repo.editProductStock(id,10));
+            return repo.getProduct(id);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return repo.getProduct(id);
     }
 }
