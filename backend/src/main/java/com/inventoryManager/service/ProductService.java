@@ -1,8 +1,11 @@
 package com.inventoryManager.service;
 
 import com.inventoryManager.model.Product;
+import org.springframework.stereotype.Service;
+
 import java.util.HashSet;
 import java.util.List;
+
 
 public interface ProductService{
     Product saveProduct(Product product);

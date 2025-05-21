@@ -11,12 +11,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired private ProductService repo;
+    @Autowired
+    private ProductService productService;
 
     @GetMapping()
     public PagedListHolder<Product> getList(@RequestParam int page,
                                             @RequestParam(required = false) String sort){
-        PagedListHolder<Product> listHolder = new PagedListHolder<>(repo.fetchProductList());
+        PagedListHolder<Product> listHolder = new PagedListHolder<>(productService.fetchProductList());
         MutableSortDefinition x = new MutableSortDefinition (sort, true, true);
         listHolder.setSort(x);
         listHolder.resort();
@@ -27,8 +28,8 @@ public class ProductController {
 
     @PostMapping()
     public Product postInventoryProduct(@RequestBody Product product){
-        repo.saveProduct(product);
-        repo.addCategory(product.getCategory());
+        productService.saveProduct(product);
+        productService.addCategory(product.getCategory());
         return product;
     }
 
@@ -37,19 +38,19 @@ public class ProductController {
         Product newProduct = new Product(product.getName(),product.getCategory(),
                                           product.getUnitPrice(), product.getStock(),
                                           product.getExpirationDate().toString());
-        repo.updateProduct(newProduct, productId);
+        productService.updateProduct(newProduct, productId);
         return newProduct;
     }
 
     @PostMapping("/{productId}/outofstock")
     public Product putProductOOS(@PathVariable Long productId){
-        repo.editStock(productId, 0);
-        return repo.fetchProduct(productId);
+        productService.editStock(productId, 0);
+        return productService.fetchProduct(productId);
     }
 
     @PostMapping("/{productId}/instock")
     public Product putProductIS(@PathVariable Long productId){
-        repo.editStock(productId, 10);
-        return repo.fetchProduct(productId);
+        productService.editStock(productId, 10);
+        return productService.fetchProduct(productId);
     }
 }
