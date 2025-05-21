@@ -3,7 +3,6 @@ package com.inventoryManager.service;
 import com.inventoryManager.model.Product;
 import com.inventoryManager.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import java.util.*;
 
