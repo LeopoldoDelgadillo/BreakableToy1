@@ -2,6 +2,7 @@ package com.inventoryManager.service;
 
 import com.inventoryManager.model.Product;
 import com.inventoryManager.repository.ProductRepository;
+import com.inventoryManager.repository.ProductRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -10,7 +11,7 @@ import java.util.*;
 public class ProductServiceImpl implements ProductService{
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductRepositoryImpl productRepository;
 
     @Override
     public Product saveProduct(Product product){
@@ -23,12 +24,12 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Product fetchProduct(Long productId){
+    public Product fetchProduct(String productId){
         return productRepository.findById(productId).get();
     }
 
     @Override
-    public Product updateProduct(Product product, Long productId){
+    public Product updateProduct(Product product, String productId){
         Product prodDB = productRepository.findById(productId).get();
 
         //update name
@@ -56,7 +57,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public void deleteProductById(Long productId){
+    public void deleteProductById(String productId){
         productRepository.deleteById(productId);
     }
 
@@ -176,7 +177,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Product editStock(Long productId, int stock) {
+    public Product editStock(String productId, int stock) {
         Product product = productRepository.findById(productId).get();
         product.setStock(stock);
         product.setUpdateDate();

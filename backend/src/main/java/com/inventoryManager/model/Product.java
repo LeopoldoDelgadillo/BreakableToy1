@@ -3,12 +3,15 @@ package com.inventoryManager.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.Entity;
+import org.springframework.cglib.core.Local;
+
+import javax.management.ConstructorParameters;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
+@Entity
 public class Product {
     private String name;
     private String category;
@@ -19,23 +22,27 @@ public class Product {
     private LocalDateTime expirationDate;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private final LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime creationDate;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime updateDate = LocalDateTime.now();
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long productId;
+    private LocalDateTime updateDate;
+    private String productId;
 
-    public Product(String name, String category, int unitPrice, int stock, String expirationDate){
+    public Product(String name, String category, int unitPrice, int stock, String expirationDate, LocalDateTime creationDate, LocalDateTime updateDate, String productId){
         this.name = name;
         this.category = category;
         this.unitPrice = unitPrice;
         this.stock = stock;
         this.expirationDate = LocalDateTime.parse(expirationDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.creationDate = creationDate;
+        this.updateDate = updateDate;
+        this.productId = productId;
     }
 
-    public Product() {}
+    public Product(String name, String category, int unitPrice, int stock, String expirationDate){
+        this(name, category, unitPrice, stock, expirationDate, LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID().toString());
+    }
+
 
     public String getName(){
         return name;
@@ -83,7 +90,7 @@ public class Product {
         this.updateDate = LocalDateTime.now();
     }
 
-    public Long getProductId(){
+    public String getProductId(){
         return productId;
     }
 }

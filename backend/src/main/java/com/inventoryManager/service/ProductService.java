@@ -1,19 +1,23 @@
 package com.inventoryManager.service;
 
 import com.inventoryManager.model.Product;
+import org.springframework.stereotype.Service;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
+@Service
 public interface ProductService{
     Product saveProduct(Product product);
 
     List<Product> fetchProductList();
 
-    Product fetchProduct(Long productId);
+    Product fetchProduct(String productId);
 
-    Product updateProduct(Product product, Long productId);
+    Product updateProduct(Product product, String productId);
 
-    void deleteProductById(Long productId);
+    void deleteProductById(String productId);
 
     List<String> getAvailability();
 
@@ -25,5 +29,5 @@ public interface ProductService{
 
     List<Product> inventorySearch(String name, List<String> categories, String availability);
 
-    Product editStock(Long productId, int stock);
+    Product editStock(String productId, int stock);
 }
