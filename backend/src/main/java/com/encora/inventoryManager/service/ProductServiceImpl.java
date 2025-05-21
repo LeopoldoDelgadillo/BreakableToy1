@@ -2,7 +2,6 @@ package com.encora.inventoryManager.service;
 
 import com.encora.inventoryManager.model.Product;
 import com.encora.inventoryManager.repository.ProductRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -29,7 +28,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Product updateProduct(@NotNull Product product, Long productId){
+    public Product updateProduct(Product product, Long productId){
         Product prodDB = productRepository.findById(productId).get();
 
         //update name
@@ -68,7 +67,7 @@ public class ProductServiceImpl implements ProductService{
         return availability;
     }
 
-    private HashSet<String> categories = new HashSet<String>();
+    private HashSet<String> categories = new HashSet<>();
 
     @Override
     public HashSet<String> getCategories(){
