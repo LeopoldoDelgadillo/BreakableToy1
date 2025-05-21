@@ -1,6 +1,7 @@
 package com.encora.inventoryManager.service;
 
 import com.encora.inventoryManager.model.Product;
+
 import java.util.HashSet;
 import java.util.List;
 

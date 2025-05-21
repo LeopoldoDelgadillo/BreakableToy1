@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.beans.ConstructorProperties;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -37,6 +36,8 @@ public class Product {
         this.stock = stock;
         this.expirationDate = LocalDateTime.parse(expirationDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
+
+    public Product() {}
 
     public String getName(){
         return name;

@@ -32,7 +32,7 @@ public class ProductController {
         return product;
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{productId}")
     public Product putInventoryProduct(@PathVariable Long productId, @RequestBody Product product) {
         Product newProduct = new Product(product.getName(),product.getCategory(),
                                           product.getUnitPrice(), product.getStock(),
@@ -41,13 +41,13 @@ public class ProductController {
         return newProduct;
     }
 
-    @PostMapping("/{id}/outofstock")
+    @PostMapping("/{productId}/outofstock")
     public Product putProductOOS(@PathVariable Long productId){
         repo.editStock(productId, 0);
         return repo.fetchProduct(productId);
     }
 
-    @PostMapping("/{id}/instock")
+    @PostMapping("/{productId}/instock")
     public Product putProductIS(@PathVariable Long productId){
         repo.editStock(productId, 10);
         return repo.fetchProduct(productId);
