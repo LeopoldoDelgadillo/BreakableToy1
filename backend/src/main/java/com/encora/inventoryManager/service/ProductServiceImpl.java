@@ -9,8 +9,7 @@ import java.util.*;
 @Service
 public class ProductServiceImpl implements ProductService{
 
-    @Autowired
-    private ProductRepository productRepository;
+    @Autowired private ProductRepository productRepository;
 
     @Override
     public Product saveProduct(Product product){

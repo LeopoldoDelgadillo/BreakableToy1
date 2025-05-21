@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
-    ProductService repo;
+    @Autowired private ProductService repo;
 
     @GetMapping()
     public PagedListHolder<Product> getList(@RequestParam int page,
