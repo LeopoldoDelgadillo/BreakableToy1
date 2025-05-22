@@ -20,7 +20,9 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public List<Product> fetchProductList(){
-        return (List<Product>) productRepository.findAll();
+        List<Product> target = new ArrayList<>();
+        productRepository.findAll().forEach(target::add);
+        return target;
     }
 
     @Override
@@ -53,6 +55,7 @@ public class ProductServiceImpl implements ProductService{
             prodDB.setExpirationDate(product.getExpirationDate());
         }
 
+        prodDB.setUpdateDate();
         return productRepository.save(prodDB);
     }
 

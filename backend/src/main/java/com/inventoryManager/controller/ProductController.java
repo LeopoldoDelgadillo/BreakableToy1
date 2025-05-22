@@ -7,6 +7,8 @@ import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -36,11 +38,8 @@ public class ProductController {
 
     @PutMapping("/{productId}")
     public Product putInventoryProduct(@PathVariable String productId, @RequestBody Product product) {
-        Product newProduct = new Product(product.getName(),product.getCategory(),
-                                          product.getUnitPrice(), product.getStock(),
-                                          product.getExpirationDate().toString(),product.getCreationDate(), LocalDateTime.now(),productId);
-        productService.updateProduct(newProduct, productId);
-        return newProduct;
+        productService.updateProduct(product, productId);
+        return productService.fetchProduct(productId);
     }
 
     @PostMapping("/{productId}/outofstock")

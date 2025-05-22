@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import org.springframework.cglib.core.Local;
 
 import javax.management.ConstructorParameters;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -22,25 +23,25 @@ public class Product {
     private LocalDateTime expirationDate;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime creationDate;
+    private final LocalDateTime creationDate;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime updateDate;
-    private String productId;
+    private final String productId;
 
-    public Product(String name, String category, int unitPrice, int stock, String expirationDate, LocalDateTime creationDate, LocalDateTime updateDate, String productId){
+    public Product(String name, String category, int unitPrice, int stock, LocalDateTime expirationDate, LocalDateTime creationDate, LocalDateTime updateDate, String productId){
         this.name = name;
         this.category = category;
         this.unitPrice = unitPrice;
         this.stock = stock;
-        this.expirationDate = LocalDateTime.parse(expirationDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.expirationDate = expirationDate;
         this.creationDate = creationDate;
         this.updateDate = updateDate;
         this.productId = productId;
     }
 
     public Product(String name, String category, int unitPrice, int stock, String expirationDate){
-        this(name, category, unitPrice, stock, expirationDate, LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID().toString());
+        this(name, category, unitPrice, stock, LocalDateTime.parse(expirationDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID().toString());
     }
 
 
