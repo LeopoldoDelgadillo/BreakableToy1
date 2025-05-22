@@ -1,7 +1,6 @@
 package com.inventoryManager.service;
 
 import com.inventoryManager.model.Product;
-import com.inventoryManager.repository.ProductRepository;
 import com.inventoryManager.repository.ProductRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
