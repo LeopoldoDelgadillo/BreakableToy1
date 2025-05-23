@@ -1,3 +1,6 @@
+'use client'
+import React, { useEffect, useState } from "react";
+
 interface Product {
         name: string;
         category: string;
@@ -9,12 +12,12 @@ interface Product {
         id: number;
       }
 
-function getProducts(pageNo: number, sort?: string): Promise<Product[]> {
+function getProducts(): Promise<Product[]> {
   const headers: Headers = new Headers()
   headers.set('Content-Type', 'application/json')
   headers.set('Accept', 'application/json')
   headers.set('X-Custom-Header', 'CustomValue')
-  const request = new Request(`/api/products?page=${pageNo}&sort=${sort}.json`, {
+  const request = new Request(`/api/products.json`, {
     method: 'GET',
     headers: headers
   })
@@ -26,7 +29,32 @@ function getProducts(pageNo: number, sort?: string): Promise<Product[]> {
 }
 
 export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    getProducts().then(setProducts);
+  }, []);
+
+  // Build table rows with a for loop
+  const rows = [];
+    for(let i=0; i<products.length; i++){
+      const product = products[i];
+      rows.push(// mock up of the product list
+        <tr>
+          <td><input type="checkbox"></input></td>
+          <td>{product.category}</td>
+          <td>{product.name}</td>
+          <td>{product.unitPrice}</td>
+          <td>{product.expirationDate.toString()}</td>
+          <td>{product.stock}</td>
+          <td>
+            <button>Edit</button>/<button>Delete</button>
+          </td>
+        </tr>
+      );
+    };
   return (
+     
     <main>
       <div 
         className="SearchBlock"
@@ -49,28 +77,22 @@ export default function Home() {
         </input>
       </div>
       <div>
-        <table style={{border: "1px solid black", width: "98%", margin: "1%"}}>
-          <tr style={{border: "1px solid black", width: "98%", fontSize: "14px"}}>
-            <th style={{border: "1px solid black", width: "5%", margin: "10px"}}><input type="checkbox"></input></th>
-            <th style={{border: "1px solid black", width: "20%", margin: "10px"}}>Category&lt;&gt;</th>
-            <th style={{border: "1px solid black", width: "25%", margin: "10px"}}>Name&lt;&gt;</th>
-            <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Price&lt;&gt;</th>
-            <th style={{border: "1px solid black", width: "25%", margin: "10px"}}>Expiration Date&lt;&gt;</th>
-            <th style={{border: "1px solid black", width: "15%", margin: "10px"}}>Stock&lt;&gt;</th>
-            <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Actions&lt;&gt;</th>
-          </tr>
-           getProducts().forEach((product) = { // mock up of the product list
-            <tr>
-              <td><input type="checkbox"></input></td>
-              <td>product.category</td>
-              <td>product.name</td>
-              <td>product.unitPrice</td>
-              <td>product.expirationDate</td>
-              <td>product.stock</td>
-              <td><input type="url">Edit</input>/<input type="url">Delete</input></td>
-            </tr>
-          });
-        </table>
+          <table style={{border: "1px solid black", width: "98%", margin: "1%"}}>
+            <thead>
+              <tr style={{border: "1px solid black", width: "98%", fontSize: "14px"}}>
+                <th style={{border: "1px solid black", width: "5%", margin: "10px"}}><input type="checkbox"></input></th>
+                <th style={{border: "1px solid black", width: "20%", margin: "10px"}}>Category&lt;&gt;</th>
+                <th style={{border: "1px solid black", width: "25%", margin: "10px"}}>Name&lt;&gt;</th>
+                <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Price&lt;&gt;</th>
+                <th style={{border: "1px solid black", width: "25%", margin: "10px"}}>Expiration Date&lt;&gt;</th>
+                <th style={{border: "1px solid black", width: "15%", margin: "10px"}}>Stock&lt;&gt;</th>
+                <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Actions&lt;&gt;</th>
+              </tr>
+            </thead>
+              <tbody>
+                {rows}
+              </tbody>
+          </table>
         <div style={{border: "1px solid black", width: "30%",height: "30px", marginLeft: "35%", marginTop: "15px"}}>
             {/*paginacion*/}
         </div>

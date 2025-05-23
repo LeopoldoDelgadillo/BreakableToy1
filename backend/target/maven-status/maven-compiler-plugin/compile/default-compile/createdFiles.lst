@@ -1,6 +1,0 @@
-com\encora\inventoryManager\InventoryManagerApplication.class
-com\encora\inventoryManager\model\Product.class
-com\encora\inventoryManager\service\ProductService.class
-com\encora\inventoryManager\service\ProductServiceImpl.class
-com\encora\inventoryManager\repository\ProductRepository.class
-com\encora\inventoryManager\controller\ProductController.class

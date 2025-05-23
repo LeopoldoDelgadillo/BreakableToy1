@@ -1,6 +1,7 @@
-D:\inventoryManagerGithub\backend\src\main\java\com\encora\inventoryManager\controller\ProductController.java
-D:\inventoryManagerGithub\backend\src\main\java\com\encora\inventoryManager\InventoryManagerApplication.java
-D:\inventoryManagerGithub\backend\src\main\java\com\encora\inventoryManager\model\Product.java
-D:\inventoryManagerGithub\backend\src\main\java\com\encora\inventoryManager\repository\ProductRepository.java
-D:\inventoryManagerGithub\backend\src\main\java\com\encora\inventoryManager\service\ProductService.java
-D:\inventoryManagerGithub\backend\src\main\java\com\encora\inventoryManager\service\ProductServiceImpl.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\controller\ProductController.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\InventoryManagerApplication.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\model\Product.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\repository\ProductRepository.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\repository\ProductRepositoryImpl.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\service\ProductService.java
+D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\service\ProductServiceImpl.java
