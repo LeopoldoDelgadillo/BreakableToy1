@@ -1,4 +1,3 @@
-import { Interface } from "readline"
 interface Product {
         name: string;
         category: string;
@@ -9,11 +8,26 @@ interface Product {
         lastUpdate: Date;
         id: number;
       }
-      
+
+function getProducts(pageNo: number, sort?: string): Promise<Product[]> {
+  const headers: Headers = new Headers()
+  headers.set('Content-Type', 'application/json')
+  headers.set('Accept', 'application/json')
+  headers.set('X-Custom-Header', 'CustomValue')
+  const request = new Request(`/api/products?page=${pageNo}&sort=${sort}.json`, {
+    method: 'GET',
+    headers: headers
+  })
+  return fetch(request)
+    .then(res => res.json())
+    .then(res => {
+      return res as Product[]
+  })
+}
+
 export default function Home() {
   return (
     <main>
-      
       <div 
         className="SearchBlock"
         style={{border: "1px solid black", width: "98%", height: "135px", margin: "1%"}}>
@@ -45,8 +59,7 @@ export default function Home() {
             <th style={{border: "1px solid black", width: "15%", margin: "10px"}}>Stock&lt;&gt;</th>
             <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Actions&lt;&gt;</th>
           </tr>
-          {
-          /* productList.forEach((product) = { mock up of the table functions
+           getProducts().forEach((product) = { // mock up of the product list
             <tr>
               <td><input type="checkbox"></input></td>
               <td>product.category</td>
@@ -56,7 +69,7 @@ export default function Home() {
               <td>product.stock</td>
               <td><input type="url">Edit</input>/<input type="url">Delete</input></td>
             </tr>
-          }); */}
+          });
         </table>
         <div style={{border: "1px solid black", width: "30%",height: "30px", marginLeft: "35%", marginTop: "15px"}}>
             {/*paginacion*/}
