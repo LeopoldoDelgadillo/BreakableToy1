@@ -1,6 +1,19 @@
+import { Interface } from "readline"
+interface Product {
+        name: string;
+        category: string;
+        unitPrice: number;
+        stock: number;
+        expirationDate: Date;
+        creationDate: Date;
+        lastUpdate: Date;
+        id: number;
+      }
+      
 export default function Home() {
   return (
     <main>
+      
       <div 
         className="SearchBlock"
         style={{border: "1px solid black", width: "98%", height: "135px", margin: "1%"}}>
@@ -15,7 +28,11 @@ export default function Home() {
         </form>
       </div>
       <div>
-        <input type="submit" value="New product" style={{border: "1px solid black", width: "120px", margin: "10px"}}></input>
+        <input 
+          type="submit" 
+          value="New product" 
+          style={{border: "1px solid black", width: "120px", margin: "10px"}}>
+        </input>
       </div>
       <div>
         <table style={{border: "1px solid black", width: "98%", margin: "1%"}}>
