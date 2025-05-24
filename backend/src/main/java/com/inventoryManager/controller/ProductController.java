@@ -8,6 +8,7 @@ import org.springframework.beans.support.PagedListHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/products")
 public class ProductController {
 
