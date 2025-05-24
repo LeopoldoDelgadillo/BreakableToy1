@@ -61,8 +61,8 @@ export default function Home() {
                 <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px"}}>Name&lt;&gt;</th>
                 <th scope="col" style={{border: "1px solid black", width: "10%", margin: "10px"}}>Price&lt;&gt;</th>
                 <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px"}}>Expiration Date&lt;&gt;</th>
-                <th scope="col" style={{border: "1px solid black", width: "15%", margin: "10px"}}>Stock&lt;&gt;</th>
-                <th scope="col" style={{border: "1px solid black", width: "10%", margin: "10px"}}>Actions&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "5%", margin: "10px"}}>Stock&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px"}}>Actions&lt;&gt;</th>
               </tr>
             </thead>
               <tbody>
@@ -75,12 +75,14 @@ export default function Home() {
       </div>
       <div style={{border: "1px solid black", width: "98%", margin: "1%"}}>
         <table style={{fontSize: "14px"}}>
-          <tr>
-            <th style={{width: "25%"}}></th>
-            <th style={{width: "25%"}}>Total product in Stock</th>
-            <th style={{width: "25%"}}>Total value in Stock</th>
-            <th style={{width: "25%"}}>Average price in Stock</th>
-          </tr>
+          <thead>
+            <tr>
+              <th style={{width: "25%"}}></th>
+              <th style={{width: "25%"}}>Total product in Stock</th>
+              <th style={{width: "25%"}}>Total value in Stock</th>
+              <th style={{width: "25%"}}>Average price in Stock</th>
+            </tr>
+          </thead>
           {
           /* categoryList.forEach((category) = { mock up of the stats functions
             <tr>
