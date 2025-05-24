@@ -1,58 +1,34 @@
-'use client'
-import React, { useEffect, useState } from "react";
-
-interface Product {
-        name: string;
-        category: string;
-        unitPrice: number;
-        stock: number;
-        expirationDate: Date;
-        creationDate: Date;
-        lastUpdate: Date;
-        id: number;
-      }
-
-function getProducts(): Promise<Product[]> {
-  const headers: Headers = new Headers()
-  headers.set('Content-Type', 'application/json')
-  headers.set('Accept', 'application/json')
-  headers.set('X-Custom-Header', 'CustomValue')
-  const request = new Request(`/api/products.json`, {
-    method: 'GET',
-    headers: headers
-  })
-  return fetch(request)
-    .then(res => res.json())
-    .then(res => {
-      return res as Product[]
-  })
-}
+'use client';
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>([]);
-
+  const[productInfo, setProductInfo] = useState([]);
   useEffect(() => {
-    getProducts().then(setProducts);
+    const getProducts = async () =>{
+      const query = fetch('http://localhost:8080/products?page=0');
+      const response = (await query).json();
+    }
+    getProducts();
   }, []);
 
-  // Build table rows with a for loop
   const rows = [];
-    for(let i=0; i<products.length; i++){
-      const product = products[i];
-      rows.push(// mock up of the product list
-        <tr>
-          <td><input type="checkbox"></input></td>
-          <td>{product.category}</td>
-          <td>{product.name}</td>
-          <td>{product.unitPrice}</td>
-          <td>{product.expirationDate.toString()}</td>
-          <td>{product.stock}</td>
-          <td>
-            <button>Edit</button>/<button>Delete</button>
-          </td>
-        </tr>
-      );
-    };
+    rows.push(
+      productInfo.map((product:any) => (
+      <div key={product.productId}>
+          <tr>
+            <td><input type="checkbox"></input></td>
+            <td>{product.category}</td>
+            <td>{product.name}</td>
+            <td>{product.unitPrice}</td>
+            <td>{product.expirationDate.toString()}</td>
+            <td>{product.stock}</td>
+            <td>
+              <button>Edit</button>/<button>Delete</button>
+            </td>
+          </tr>
+      </div>
+  )));
+      
   return (
      
     <main>
