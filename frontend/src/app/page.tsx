@@ -78,15 +78,15 @@ export default function Home() {
       </div>
       <div>
           <table style={{border: "1px solid black", width: "98%", margin: "1%"}}>
-            <thead>
-              <tr style={{border: "1px solid black", width: "98%", fontSize: "14px"}}>
-                <th style={{border: "1px solid black", width: "5%", margin: "10px"}}><input type="checkbox"></input></th>
-                <th style={{border: "1px solid black", width: "20%", margin: "10px"}}>Category&lt;&gt;</th>
-                <th style={{border: "1px solid black", width: "25%", margin: "10px"}}>Name&lt;&gt;</th>
-                <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Price&lt;&gt;</th>
-                <th style={{border: "1px solid black", width: "25%", margin: "10px"}}>Expiration Date&lt;&gt;</th>
-                <th style={{border: "1px solid black", width: "15%", margin: "10px"}}>Stock&lt;&gt;</th>
-                <th style={{border: "1px solid black", width: "10%", margin: "10px"}}>Actions&lt;&gt;</th>
+            <thead style={{border: "1px solid black", width: "98%", fontSize: "14px"}}>
+              <tr>
+                <th scope="col" style={{border: "1px solid black", width: "5%", margin: "10px"}}><input type="checkbox"></input></th>
+                <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px"}}>Category&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px"}}>Name&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "10%", margin: "10px"}}>Price&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px"}}>Expiration Date&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "15%", margin: "10px"}}>Stock&lt;&gt;</th>
+                <th scope="col" style={{border: "1px solid black", width: "10%", margin: "10px"}}>Actions&lt;&gt;</th>
               </tr>
             </thead>
               <tbody>

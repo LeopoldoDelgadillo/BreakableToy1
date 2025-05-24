@@ -1,7 +1,7 @@
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\controller\ProductController.java
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\InventoryManagerApplication.java
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\model\Product.java
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\repository\ProductRepository.java
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\repository\ProductRepositoryImpl.java
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\service\ProductService.java
-D:\inventoryManagerGithub\backend\src\main\java\com\inventoryManager\service\ProductServiceImpl.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/InventoryManagerApplication.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/controller/ProductController.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/model/Product.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/repository/ProductRepository.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/repository/ProductRepositoryImpl.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/service/ProductService.java
+/Users/leopoldo.delgadillo/Documents/InventoryManager/BreakableToy1/backend/src/main/java/com/inventoryManager/service/ProductServiceImpl.java
