@@ -2,27 +2,28 @@
 import { useEffect, useState } from "react";
 var page=0
 var sortString: string = "";
-var search: Array<string> = [];
+
 export default function Home() {
   const[productList, setProductList] = useState([]);
   const[productPageCount, setProductPageCount] = useState(0);
   const[productCurrentPage, setProductCurrentPage] = useState(0);
-  const[productFullList, setProductFullList] = useState([]);
-  const getProducts = async (page: number, sort?: string, search?: string) =>{
+  const getProducts = async (page: number, sort?: string, searchName?:string, searchCategory?: Array<string>, searchAvailability?: string) =>{
     try{
       let url = `http://localhost:9090/products?page=${page}`;
       if (sort) {
         url += `&sort=${sort}`;
         sortString = sort;}
-      if (search) {
-        search = search;}
+      if (searchName !== undefined && searchName !== "") url += `&searchName=${searchName}`;
+      if (searchCategory !== undefined && searchCategory.length) url += `&searchCategory=${searchCategory}`;
+      searchAvailability !== undefined ? url += `&searchAvailability=${searchAvailability}` : url += "&searchAvailability=All";
+      console.log("Fetching products from URL:", url);
       const response = await (await fetch(url)).json();
       console.log("Fetched products:", response);
       setProductList(response.pageList);
       setProductPageCount(response.pageCount);
       setProductCurrentPage(response.currentPage);
-      setProductFullList(response.source);
       pagination()
+      getProductStats();
     }catch (error){
       console.error("Error fetching products:", error);
     }
@@ -49,6 +50,19 @@ export default function Home() {
     );
   });
 
+  const[productFullList, setProductFullList] = useState([]);
+  const getProductStats = async () =>{
+    try{
+      let url = "http://localhost:9090/products?page=0&searchAvailability=All";
+      const response = await (await fetch(url)).json();
+      console.log("Fetched products for category stats:", response);
+      setProductFullList(response.source);
+    }catch (error){
+      console.error("Error fetching products for category stats:", error);
+    }
+    
+  }
+  
   let categories = new Map<string, categoryStats>();
   const categoriesMapping = productFullList.map((product:any) => {
     const categoryStat = categories.get(product.category);
@@ -110,21 +124,41 @@ export default function Home() {
     );
   });
   
+  const [nameValue, setNameValue] = useState("");
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameValue(e.target.value);
+  };
+
+  const [categoryValue, setCategoryValue] = useState<string[]>([]);
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = Array.from(e.target.selectedOptions, option => option.value);
+    setCategoryValue(selected);
+  };
+
+  const [availabilityValue, setAvailabilityValue] = useState("");
+  const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAvailabilityValue(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    getProducts(page, sortString, nameValue, categoryValue, availabilityValue);
+  };
   return (
     <main>
       <div
         className="SearchBlock"
         style={{ width: "98%", height: "155px", margin: "1%" }}>
-        <form style={{border: "1px solid black", width:"100%", maxWidth: "500px", height:"100%", marginLeft: "auto",marginRight:"auto",textAlign:"center"}}>
+        <form onSubmit={handleSubmit} style={{border: "1px solid black", width:"100%", maxWidth: "500px", height:"100%", marginLeft: "auto",marginRight:"auto",textAlign:"center"}}>
           <label htmlFor="name" style={{width:"300px", marginLeft:"auto",marginRight:"auto",}}>Name</label>
-          <input type="text" id="name" name="name" style={{ border: "1px solid black" , width:"35%", maxWidth: "200px", height: "25px", marginLeft:"2%", marginTop: "10px"}}></input><br></br>
+          <input type="text" id="name" name="name" value={nameValue} onChange={() => {handleNameChange}} style={{ border: "1px solid black" , width:"35%", maxWidth: "200px", height: "25px", marginLeft:"2%", marginTop: "10px"}}></input><br></br>
           <label htmlFor="categories" style={{width:"300px", textAlign:"center"}}>Category</label>
-          <select id="categories" name="categories" style={{ border: "1px solid black", width:"30%", maxWidth: "300px", height: "25px", marginLeft:"2%", marginTop: "10px"}}>{getCategories}</select><br></br>
+          <select multiple id="categories" name="categories" value={categoryValue} onChange={() => {handleCategoryChange}} style={{ border: "1px solid black", width:"30%", maxWidth: "300px", height: "25px", marginLeft:"2%", marginTop: "10px"}}>{getCategories}</select><br></br>
           <label htmlFor="availability" style={{width:"300px", textAlign:"center"}}>Availability</label>
-          <select id="availability" name="availability" style={{ border: "1px solid black", width:"28%", maxWidth: "500px",height:"25px", marginLeft:"2%", marginTop: "10px"}}>
-            <option value="outOfStock">Out of Stock</option>
-            <option value="inStock">In Stock</option>
-            <option value="all">All</option>  
+          <select id="availability" name="availability" value={availabilityValue} onChange={() => {handleAvailabilityChange}} style={{ border: "1px solid black", width:"28%", maxWidth: "500px",height:"25px", marginLeft:"2%", marginTop: "10px"}}>
+            <option value="All">All</option>  
+            <option value="In Stock">In Stock</option>
+            <option value="Out of Stock">Out of Stock</option>
           </select><br></br>
           <button type="submit" style={{border: "1px solid black",width: "120px", height:"25px", marginTop: "10px", textAlign:"center", marginLeft: "auto",marginRight:"auto"}}>Search</button>
         </form>

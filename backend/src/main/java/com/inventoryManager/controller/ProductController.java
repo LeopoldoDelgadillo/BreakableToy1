@@ -24,8 +24,15 @@ public class ProductController {
 
     @GetMapping()
     public PagedListHolder<Product> getList(@RequestParam int page,
-                                            @RequestParam(required = false) String sort){
-        PagedListHolder<Product> listHolder = new PagedListHolder<>(productService.fetchProductList());
+                                            @RequestParam(required = false) String sort,
+                                            @RequestParam(required = false) String searchName,
+                                            @RequestParam(required = false) List<String> searchCategory,
+                                            @RequestParam(required = false) String searchAvailability) {
+        PagedListHolder<Product> listHolder;
+        if (searchName == null && searchCategory == null && searchAvailability == "All") {
+            listHolder = new PagedListHolder<>(productService.fetchProductList());
+        }
+        else{listHolder = new PagedListHolder<>(productService.inventorySearch(searchName, searchCategory, searchAvailability));}
         MutableSortDefinition x = new MutableSortDefinition (sort, true, true);
         listHolder.setSort(x);
         listHolder.resort();

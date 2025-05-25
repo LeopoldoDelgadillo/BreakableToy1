@@ -17,8 +17,6 @@ public interface ProductService{
 
     void deleteProductById(String productId);
 
-    List<String> getAvailability();
-
     HashSet<String> getCategories();
 
     void addCategory(String category);

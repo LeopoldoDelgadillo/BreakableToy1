@@ -63,13 +63,6 @@ public class ProductServiceImpl implements ProductService{
         productRepository.deleteById(productId);
     }
 
-    private final List<String> availability = Arrays.asList("Out of Stock", "In Stock", "All");
-
-    @Override
-    public List<String> getAvailability(){
-        return availability;
-    }
-
     private HashSet<String> categories = new HashSet<>();
 
     @Override
@@ -90,34 +83,11 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public List<Product> inventorySearch(String name, List<String> categories, String availability) {
         HashSet<Product> searchedList = new HashSet<>();
-        if(name==null&&categories.isEmpty()&&availability==null){
-            searchedList.addAll((List<Product>)productRepository.findAll());
-        }
-        else{
-            for (Product product : productRepository.findAll()){
-                if(name!=null){
-                    if(!categories.isEmpty()){
-                        for(String category : categories){
-                            if(product.getName().equals(name)&&product.getCategory().equals(category)){
-                                switch (availability){
-                                    case "Out of Stock":
-                                        if(product.getStock()==0){
-                                            searchedList.add(product);
-                                        }
-                                        break;
-                                    case "In Stock":
-                                        if(product.getStock()>0){
-                                            searchedList.add(product);
-                                        }
-                                        break;
-                                    case "All":
-                                        searchedList.add(product);
-                                }
-                            }
-                        }
-                    }
-                    else{
-                        if(product.getName().equals(name)){
+        for (Product product : productRepository.findAll()){
+            if(name!=null){
+                if(categories!=null&&!categories.isEmpty()){
+                    for(String category : categories){
+                        if(product.getName().equals(name)&&product.getCategory().equals(category)){
                             switch (availability){
                                 case "Out of Stock":
                                     if(product.getStock()==0){
@@ -131,32 +101,13 @@ public class ProductServiceImpl implements ProductService{
                                     break;
                                 case "All":
                                     searchedList.add(product);
+                                    break;
                             }
                         }
                     }
                 }
                 else{
-                    if(!categories.isEmpty()){
-                        for(String category : categories){
-                            if(product.getCategory().equals(category)){
-                                switch (availability){
-                                    case "Out of Stock":
-                                        if(product.getStock()==0){
-                                            searchedList.add(product);
-                                        }
-                                        break;
-                                    case "In Stock":
-                                        if(product.getStock()>0){
-                                            searchedList.add(product);
-                                        }
-                                        break;
-                                    case "All":
-                                        searchedList.add(product);
-                                }
-                            }
-                        }
-                    }
-                    else{
+                    if(product.getName().equals(name)){
                         switch (availability){
                             case "Out of Stock":
                                 if(product.getStock()==0){
@@ -170,7 +121,48 @@ public class ProductServiceImpl implements ProductService{
                                 break;
                             case "All":
                                 searchedList.add(product);
+                                break;
                         }
+                    }
+                }
+            }
+            else{
+                if(categories!=null&&!categories.isEmpty()){
+                    for(String category : categories){
+                        if(product.getCategory().equals(category)){
+                            switch (availability){
+                                case "Out of Stock":
+                                    if(product.getStock()==0){
+                                        searchedList.add(product);
+                                    }
+                                    break;
+                                case "In Stock":
+                                    if(product.getStock()>0){
+                                        searchedList.add(product);
+                                    }
+                                    break;
+                                case "All":
+                                    searchedList.add(product);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                else{
+                    switch (availability){
+                        case "Out of Stock":
+                            if(product.getStock()==0){
+                                searchedList.add(product);
+                            }
+                            break;
+                        case "In Stock":
+                            if(product.getStock()>0){
+                                searchedList.add(product);
+                            }
+                            break;
+                        case "All":
+                            searchedList.add(product);
+                            break;
                     }
                 }
             }
