@@ -1,7 +1,14 @@
 package com.inventoryManager.controller;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventoryManager.model.Product;
 import com.inventoryManager.service.ProductService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PagedListHolder;
@@ -28,10 +35,24 @@ public class ProductController {
     }
 
     @PostMapping()
-    public Product postInventoryProduct(@RequestBody Product product){
+    public List<Product> postInventoryProductList(@RequestBody Object body){
+        List<Product> products = new ArrayList<>();
+    if (body instanceof List) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        products = ((List<?>) body).stream()
+            .map(obj -> mapper.convertValue(obj, Product.class))
+            .collect(Collectors.toList());
+    } else {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        products.add(mapper.convertValue(body, Product.class));
+    }
+    for (Product product : products) {
         productService.saveProduct(product);
         productService.addCategory(product.getCategory());
-        return product;
+    }
+    return products;
     }
 
     @PutMapping("/{productId}")
