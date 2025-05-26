@@ -1,5 +1,4 @@
 'use client';
-import { maxHeaderSize } from "http";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 var pageTable=0
@@ -159,7 +158,6 @@ export default function Home() {
       width: "100%",
       maxWidth: "500px",
       height: "25px",
-      maxHeaderSize:"25px",
       marginLeft: "2%",
       marginTop: "10px"
     }),
@@ -220,7 +218,7 @@ export default function Home() {
                 {getCategories}
               </select>
               ) : (
-              <input id="category" name="category" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"14px", width:"146.5px", height:"25px" }} />
+              <input id="category" name="category" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"14px", width:"146.5px", height:"25px" }} required/>
               )}
               <label>
                 <input 
@@ -236,25 +234,64 @@ export default function Home() {
               <label htmlFor="stock">Stock</label>
               <input type="number" id="stock" name="stock" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
               <label htmlFor="expirationDate">Expiration Date</label>
-              <input type="date" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required /><br></br>
-              <button type="submit" style={{ border:"1px solid black" ,width:"50px", marginTop:"10px"}}>Save</button>
+              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required /><br></br>
+              <button type="submit" style={{ border:"1px solid black" ,width:"55px", marginTop:"10px"}}>Create</button>
             </form>
           </div>
           }
       </div>
   )
+  
+  /** Interface to create the product that we are going to send to the database. */
+  interface Product {
+    name: string,
+    category: string,
+    unitPrice: number,
+    stock: number,
+    expirationDate: string
+  }
+
+  /** Function that sends the created product to the database. */
+  async function sendNewProduct(product: Product){
+    try{
+      const response = await fetch('http://localhost:9090/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(product),
+      });
+      const result = await response.json();
+      location.reload();
+      return result;
+    }
+    catch(error){
+      console.error('Error sending data:',error);
+      throw new Error('Failed to send data');
+    }
+  }
 
   /**Function that handles the Save button of the modal and sends
    * the new product information to the database. */
   const handleModalSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       const formData = new FormData(e.target as HTMLFormElement);
-      const name = formData.get("name") as string;
-      const category = formData.get("categorySelect") as string;
-      const unitPrice = parseFloat(formData.get("unitPrice") as string);
-      const stock = parseInt(formData.get("stock") as string, 10);
-      const expirationDate = formData.get("expirationDate") as string;
-
+      let name = formData.get("name") as string;
+      let category = formData.get("category") as string;
+      let unitPrice = parseFloat(formData.get("unitPrice") as string);
+      let stock = parseInt(formData.get("stock") as string, 10);
+      let expirationDate = formData.get("expirationDate") as string;
+      const expirationDatePart1 = expirationDate.split('T')[0]
+      const expirationDatePart2 = expirationDate.split('T')[1]
+      expirationDate = expirationDatePart1+" "+expirationDatePart2+":00";
+      const newProduct: Product = {
+        name: name,
+        category: category,
+        unitPrice: unitPrice,
+        stock: stock,
+        expirationDate: expirationDate
+      }
+      sendNewProduct(newProduct)
       console.log("Submitting product:", { name, category, unitPrice, stock, expirationDate });
   }
 
