@@ -1,5 +1,4 @@
 'use client';
-import { maxHeaderSize } from "http";
 import { useEffect, useState } from "react";
 import Select from "react-select";
 var pageTable=0
@@ -159,7 +158,6 @@ export default function Home() {
       width: "100%",
       maxWidth: "500px",
       height: "25px",
-      maxHeaderSize:"25px",
       marginLeft: "2%",
       marginTop: "10px"
     }),
