@@ -3,7 +3,11 @@ import { useEffect, useState } from "react";
 var page=0
 var sortString: string = "";
 
+
 export default function Home() {
+
+  /** Function that fetches the list of products 
+   * that are going to appear on the table. */
   const[productList, setProductList] = useState([]);
   const[productPageCount, setProductPageCount] = useState(0);
   const[productCurrentPage, setProductCurrentPage] = useState(0);
@@ -29,13 +33,9 @@ export default function Home() {
     }
   }
 
-  interface categoryStats {
-    name: string,
-    totalStock: number,
-    totalPrice: number
-  }
-
   
+  /** Function that uses the fetched list of products
+   * and maps it to the table in HTML. */
   const productRows = productList.map((product:any) => {
     return (
     <tr key={product.productId}>
@@ -50,6 +50,9 @@ export default function Home() {
     );
   });
 
+  /** Function that fetches the complete list of products in the database,
+   * regardless of the page and search parameters, for use 
+   * on the category statistics table. */
   const[productFullList, setProductFullList] = useState([]);
   const getProductStats = async () =>{
     try{
@@ -63,6 +66,16 @@ export default function Home() {
     
   }
   
+  /** Interface for creating models that keep track of the statistics 
+   * of each category. */
+  interface categoryStats {
+    name: string,
+    totalStock: number,
+    totalPrice: number
+  }
+
+  /** Object that uses the fetched full list of products and creates
+   * the models through the interface categoryStats. */
   let categories = new Map<string, categoryStats>();
   const categoriesMapping = productFullList.map((product:any) => {
     const categoryStat = categories.get(product.category);
@@ -81,6 +94,9 @@ export default function Home() {
       categoryStat.totalPrice += product.unitPrice * product.stock;
     }
   });
+
+  /** Run categoriesMapping, and with the models created for every category
+   * we map them into the table in HTML. */
   categoriesMapping;
   const categoryRows = Array.from(categories.values()).map((categoryStat: categoryStats) => {
     console.log("Adding rows:", categories);
@@ -94,10 +110,12 @@ export default function Home() {
     );
   });
 
+  /** Run the function to fetch the products for the main table. */
   useEffect(() => {
     getProducts(page);
   }, []);
   
+  /** Function that handles the pagination buttons below the table */
   const pagination = () => {
     const pages = [];
     for (let i = 0; i < productPageCount; i++) {
@@ -116,6 +134,7 @@ export default function Home() {
     return pages;
   }
 
+  /** Object used to return the categories that exist. */
   const getCategories = Array.from(categories.values()).map((category) => {
     return (
       <option key={category.name} value={category.name}>
@@ -124,36 +143,112 @@ export default function Home() {
     );
   });
   
+  /** Functions that handle the search parameters of the Search Block. */
   const [nameValue, setNameValue] = useState("");
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNameValue(e.target.value);
   };
-
   const [categoryValue, setCategoryValue] = useState<string[]>([]);
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = Array.from(e.target.selectedOptions, option => option.value);
     setCategoryValue(selected);
   };
-
   const [availabilityValue, setAvailabilityValue] = useState("");
   const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAvailabilityValue(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /** function that handles the Search button and does the searching. */
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     getProducts(page, sortString, nameValue, categoryValue, availabilityValue);
   };
+
+  /** Variables and function for the New Product Modal. */
+  const [showModal, setShowModal] = useState(false);
+  const openModal = () => setShowModal(true);
+  const closeModal = () => setShowModal(false);
+
+  /**Function that handles the modal creation and options. */
+  const productModal = () => (
+      <div 
+        className="modal"
+        style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000
+        }}>
+          {
+          <div style={{ background: "#fff", padding: 24, borderRadius: 8, minWidth: 300 }}>
+            <button onClick={closeModal} style={{ float: "right" }}>X</button>
+            <form onSubmit={handleModalSubmit}>
+              <label htmlFor="name">Name</label>
+              <input type="text" id="name" name="name" style={{ border:"1px solid black", marginTop:"25px", marginLeft:"36px", width:"146.5px", height:"25px" }} required /><br></br>
+              <label htmlFor="category">Category</label>
+              {!showCategoryInput ? (
+              <select id="category" name="category" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"14px", width:"146.5px", height:"25px" }} required>
+                {getCategories}
+              </select>
+              ) : (
+              <input id="category" name="category" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"14px", width:"146.5px", height:"25px" }} />
+              )}
+              <label>
+                <input 
+                  type="checkbox" 
+                  id="check" 
+                  checked={showCategoryInput}
+                  onChange={handleCheckChange}
+                  style={{marginLeft:"10px",marginRight:"3px"}}/>
+                  New category
+              </label><br></br>
+              <label htmlFor="unitPrice">Unit Price</label>
+              <input type="number" id="unitPrice" name="unitPrice" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px", width:"146px", height:"25px" }} required /><br></br>
+              <label htmlFor="stock">Stock</label>
+              <input type="number" id="stock" name="stock" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
+              <label htmlFor="expirationDate">Expiration Date</label>
+              <input type="date" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required /><br></br>
+              <button type="submit" style={{ border:"1px solid black" ,width:"50px", marginTop:"10px"}}>Save</button>
+            </form>
+          </div>
+          }
+      </div>
+  )
+
+  /**Function that handles the Save button of the modal and sends
+   * the new product information to the database. */
+  const handleModalSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      const formData = new FormData(e.target as HTMLFormElement);
+      const name = formData.get("name") as string;
+      const category = formData.get("categorySelect") as string;
+      const unitPrice = parseFloat(formData.get("unitPrice") as string);
+      const stock = parseInt(formData.get("stock") as string, 10);
+      const expirationDate = formData.get("expirationDate") as string;
+
+      console.log("Submitting product:", { name, category, unitPrice, stock, expirationDate });
+  }
+
+  /** Variable and function to handle the new category check on the modal. */
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  const handleCheckChange = () => {
+    setShowCategoryInput((prev) => !prev);
+  };
+
+  /** HTML code of the app that renders on http://localhost:8080 */
   return (
     <main>
       <div
         className="SearchBlock"
         style={{ width: "98%", height: "155px", margin: "1%" }}>
-        <form onSubmit={handleSubmit} style={{border: "1px solid black", width:"100%", maxWidth: "500px", height:"100%", marginLeft: "auto",marginRight:"auto",textAlign:"center"}}>
+        <form onSubmit={handleSearchSubmit} style={{border: "1px solid black", width:"100%", maxWidth: "500px", height:"100%", marginLeft: "auto",marginRight:"auto",textAlign:"center"}}>
           <label htmlFor="name" style={{width:"300px", marginLeft:"auto",marginRight:"auto",}}>Name</label>
           <input type="text" id="name" name="name" value={nameValue} onChange={() => {handleNameChange}} style={{ border: "1px solid black" , width:"35%", maxWidth: "200px", height: "25px", marginLeft:"2%", marginTop: "10px"}}></input><br></br>
           <label htmlFor="categories" style={{width:"300px", textAlign:"center"}}>Category</label>
-          <select multiple id="categories" name="categories" value={categoryValue} onChange={() => {handleCategoryChange}} style={{ border: "1px solid black", width:"30%", maxWidth: "300px", height: "25px", marginLeft:"2%", marginTop: "10px"}}>{getCategories}</select><br></br>
+          <select id="categories" name="categories" value={categoryValue} onChange={() => {handleCategoryChange}} style={{ border: "1px solid black", width:"30%", maxWidth: "300px", height: "25px", marginLeft:"2%", marginTop: "10px"}}>{getCategories}</select><br></br>
           <label htmlFor="availability" style={{width:"300px", textAlign:"center"}}>Availability</label>
           <select id="availability" name="availability" value={availabilityValue} onChange={() => {handleAvailabilityChange}} style={{ border: "1px solid black", width:"28%", maxWidth: "500px",height:"25px", marginLeft:"2%", marginTop: "10px"}}>
             <option value="All">All</option>  
@@ -164,12 +259,14 @@ export default function Home() {
         </form>
       </div>
       <div style={{width:"120px", marginLeft: "auto", marginRight: "auto",marginTop: "10px", marginBottom: "10px", textAlign: "center"}}>
-        <input 
-          type="submit" 
-          value="New product" 
-          style={{border: "1px solid black",width:"120px"}}>
-        </input>
+        <button 
+          type="button"
+          style={{border: "1px solid black",width:"120px"}}
+          onClick={openModal}>
+            New Product
+        </button>
       </div>
+      {showModal && productModal()}
       <div>
           <table style={{border: "1px solid black", width: "98%",maxWidth:"1000px", marginLeft: "auto",marginRight: "auto", fontSize: "14px"}}>
             <thead style={{border: "1px solid black"}}>
