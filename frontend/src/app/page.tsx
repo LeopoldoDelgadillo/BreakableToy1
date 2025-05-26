@@ -4,12 +4,11 @@ import Select from "react-select";
 var pageTable=0
 var sortString: string = "";
 
-
 export default function Home() {
 
   /** Function that fetches the list of products 
    * that are going to appear on the table. */
-  const[productList, setProductList] = useState([]);
+  const[productList, setProductList] = useState<Product[]>([]);
   const[productPageCount, setProductPageCount] = useState(0);
   const[productCurrentPage, setProductCurrentPage] = useState(0);
   const getProducts = async (page: number, sort?: string, searchName?:string, searchCategory?: Array<string>, searchAvailability?: string) =>{
@@ -35,22 +34,17 @@ export default function Home() {
     }
   }
 
-  
-  /** Function that uses the fetched list of products
-   * and maps it to the table in HTML. */
-  const productRows = productList.map((product:any) => {
-    return (
-    <tr key={product.productId}>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}><input type="checkbox"></input></td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.category}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.name}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.unitPrice}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.expirationDate.toString()}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.stock}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}><button><strong>Edit</strong></button>/<button><strong>Delete</strong></button></td>
-    </tr>
-    );
-  });
+  /** Interface to create the product that we are going to send to the database. */
+  interface Product {
+    productId?: string;
+    name: string,
+    category: string,
+    unitPrice: number,
+    stock: number,
+    expirationDate: string,
+    creationDate?: string,
+    lastUpdate?: string
+  }
 
   /** Function that fetches the complete list of products in the database,
    * regardless of the page and search parameters, for use 
@@ -66,14 +60,6 @@ export default function Home() {
       console.error("Error fetching products for category stats:", error);
     }
     
-  }
-  
-  /** Interface for creating models that keep track of the statistics 
-   * of each category. */
-  interface categoryStats {
-    name: string,
-    totalStock: number,
-    totalPrice: number
   }
 
   /** Object that uses the fetched full list of products and creates
@@ -107,10 +93,226 @@ export default function Home() {
         <td style={{textAlign:"center"}}>{categoryStat.name}</td>
         <td style={{textAlign:"center"}}>{categoryStat.totalStock}</td>
         <td style={{textAlign:"center"}}>{categoryStat.totalPrice}</td>
-        <td style={{textAlign:"center"}}>{(categoryStat.totalPrice / categoryStat.totalStock).toFixed(2)}</td>
+        <td style={{textAlign:"center"}}>{categoryStat.totalStock==0 ? 0 : (categoryStat.totalPrice / categoryStat.totalStock).toFixed(2)}</td>
       </tr>
     );
   });
+
+  /** Function that sends a request to the database to change the stock
+   * number of the requested product */
+  async function setProductStock(product: Product, checkboxState: boolean, productId: string){
+    try{
+      const fetchURL: string = checkboxState == true ? `http://localhost:9090/products/${productId}/outofstock` : `http://localhost:9090/products/${productId}/instock`;
+      const response = await fetch(fetchURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(product),
+      });
+      const result = await response.json();
+      setProductList((prevList: any[]) =>
+        prevList.map((p) =>
+          String(p.productId) === String(productId)
+            ? { ...p, stock: result.stock } // update stock with the value returned by the API
+            : p
+        )
+      );
+      getProductStats();
+      return result;
+    }
+    catch(error){
+      console.error('Error sending data:',error);
+      throw new Error('Failed to send data');
+    }
+  }
+
+  /** Functions that handle when checkbox changes state. */
+  const [checkedProducts, setCheckedProducts] = useState<string[]>([]);
+  const handleProductCheckbox=(e: React.ChangeEvent<HTMLInputElement>)=>{
+    const productId = e.target.value;
+    const checkboxState = e.target.checked;
+    const product = productList.find((p: any) => String(p.productId) === productId);
+    setCheckedProducts((prev) =>
+    checkboxState
+      ? [...prev, productId]
+      : prev.filter((id) => id !== productId)
+    );
+    if (product) {
+      setProductStock(product, checkboxState,productId);
+    } else {
+      console.warn("Product not found for id:", productId);
+    }
+  }
+  const handleSelectAllCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    if (checked) {
+      setCheckedProducts(productList.map((p) => String(p.productId)));
+      productList.forEach((product) => {
+        setProductStock(product, true, String(product.productId));
+      });
+    } else {
+      setCheckedProducts([]);
+        productList.forEach((product) => {
+        setProductStock(product, false, String(product.productId));
+      });
+    }
+  };
+  
+  async function sendEditedProduct(product: Product, productId: string){
+    try{
+      const response = await fetch(`http://localhost:9090/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(product),
+      });
+      const result = await response.json();
+      location.reload();
+      return result;
+    }
+    catch(error){
+      console.error('Error sending data:',error);
+      throw new Error('Failed to send data');
+    }
+  }
+
+  const handleEditSubmit = (e: React.FormEvent, id: string) => {
+    e.preventDefault();
+    const productId = id;
+    const formData = new FormData(e.target as HTMLFormElement);
+    let name = formData.get("name") as string;
+    let category = formData.get("category") as string;
+    let unitPrice = parseFloat(formData.get("unitPrice") as string);
+    let stock = parseInt(formData.get("stock") as string, 10);
+    let expirationDate = formData.get("expirationDate") as string;
+    const expirationDatePart1 = expirationDate.split('T')[0]
+    const expirationDatePart2 = expirationDate.split('T')[1]
+    expirationDate = expirationDatePart1+" "+expirationDatePart2;
+    const editedProduct: Product = {
+      name: name,
+      category: category,
+      unitPrice: unitPrice,
+      stock: stock,
+      expirationDate: expirationDate
+    }
+    sendEditedProduct(editedProduct,productId)
+    console.log("Submitting product:", { name, category, unitPrice, stock, expirationDate });
+  }
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const closeEditModal = () => {setShowEditModal(false);setEditingProductId(null);}
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const editProduct = (productId: string) => (
+    <div 
+        className="modal"
+        style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000
+        }}>
+          {
+          <div style={{ background: "#fff", padding: 24, borderRadius: 8, minWidth: 300 }}>
+            <button onClick={closeEditModal} style={{ float: "right" }}>X</button>
+            <form onSubmit={(e) => handleEditSubmit(e,productId)}>
+              <label htmlFor="name">Name</label>
+              <input type="text" id="name" name="name" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.name}`} style={{ border:"1px solid black", marginTop:"25px", marginLeft:"36px", width:"146.5px", height:"25px" }} required /><br></br>
+              <label htmlFor="category">Category</label>
+              {!showCategoryInput ? (
+              <select id="category" name="category" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.category}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"14px", width:"146.5px", height:"25px" }} required>
+                {getCategories}
+              </select>
+              ) : (
+              <input id="category" name="category" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.category}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"14px", width:"146.5px", height:"25px" }} required/>
+              )}
+              <label>
+                <input 
+                  type="checkbox" 
+                  id="check" 
+                  checked={showCategoryInput}
+                  onChange={handleCheckChange}
+                  style={{marginLeft:"10px",marginRight:"3px"}}/>
+                  New category
+              </label><br></br>
+              <label htmlFor="unitPrice">Unit Price</label>
+              <input type="number" id="unitPrice" name="unitPrice" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.unitPrice}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px", width:"146px", height:"25px" }} required /><br></br>
+              <label htmlFor="stock">Stock</label>
+              <input type="number" id="stock" name="stock" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.stock}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
+              <label htmlFor="expirationDate">Expiration Date</label>
+              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.expirationDate}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required /><br></br>
+              <button type="submit" style={{ border:"1px solid black" ,width:"55px", marginTop:"10px"}}>Save</button>
+            </form>
+          </div>
+          }
+      </div>
+  );
+
+   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const closeDeleteModal = () => {setShowDeleteModal(false);setDeletingProductId(null);}
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
+  const deleteProduct = (productId: string) => (
+    <div 
+        className="modal"
+        style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000
+        }}>
+          {
+          <div style={{ background: "#fff", padding: 24, borderRadius: 8, minWidth: 300, textAlign:"center" }}>
+            <button onClick={closeDeleteModal} style={{ float: "right" }}>X</button><br></br>
+            <div style={{marginTop:"25px"}}>Are you sure you want to delete this product?</div><br></br>
+            <button onClick={() => {
+              fetch(`http://localhost:9090/products/${productId}`, {
+                method: 'DELETE',
+              })
+              .then(response => {
+                if (response.ok) {
+                  console.log("Product deleted successfully");
+                  location.reload();
+                } else {
+                  console.error("Failed to delete product");
+                }
+              })
+              .catch(error => console.error("Error deleting product:", error));
+            }} style={{ width:"50px",textAlign:"center", backgroundColor:"red", color:"white", border:"1px solid black", marginTop:"25px" }}>Yes</button>
+          </div>
+          }
+      </div>
+  );
+
+  /** Function that uses the fetched list of products
+   * and maps it to the table in HTML. */
+  const productRows = productList.map((product:any) => {
+    return (
+    <tr key={product.productId}>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}><input type="checkbox" value={product.productId} checked={checkedProducts.includes(String(product.productId))} onChange={handleProductCheckbox}></input></td>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.category}</td>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.name}</td>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.unitPrice}</td>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.expirationDate.toString()}</td>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.stock}</td>
+      <td style={{ border: "1px solid gray", textAlign:"center"}}><button value={product.productId} onClick={() => setEditingProductId(product.productId)}><strong>Edit</strong></button>/<button onClick={() => setDeletingProductId(product.productId)}><strong>Delete</strong></button></td>
+    </tr>
+    );
+  });
+
+  /** Interface for creating models that keep track of the statistics 
+   * of each category. */
+  interface categoryStats {
+    name: string,
+    totalStock: number,
+    totalPrice: number
+  }
 
   /** Run the function to fetch the products for the main table. */
   useEffect(() => {
@@ -241,15 +443,6 @@ export default function Home() {
           }
       </div>
   )
-  
-  /** Interface to create the product that we are going to send to the database. */
-  interface Product {
-    name: string,
-    category: string,
-    unitPrice: number,
-    stock: number,
-    expirationDate: string
-  }
 
   /** Function that sends the created product to the database. */
   async function sendNewProduct(product: Product){
@@ -300,7 +493,7 @@ export default function Home() {
   const handleCheckChange = () => {
     setShowCategoryInput((prev) => !prev);
   };
-  
+
   /** HTML code of the app that renders on http://localhost:8080 */
   return (
     <main>
@@ -332,11 +525,13 @@ export default function Home() {
         </button>
       </div>
       {showModal && productModal()}
+      {editingProductId && editProduct(editingProductId)}
+      {deletingProductId && deleteProduct(deletingProductId)}
       <div>
           <table style={{border: "1px solid black", width: "98%",maxWidth:"1000px", marginLeft: "auto",marginRight: "auto", fontSize: "14px"}}>
             <thead style={{border: "1px solid black"}}>
               <tr>
-                <th scope="col" style={{border: "1px solid black", width: "5%",textAlign:"center"}}><input type="checkbox"></input></th>
+                <th scope="col" style={{border: "1px solid black", width: "5%",textAlign:"center"}}><input type="checkbox" checked={checkedProducts.length === productList.length && productList.length > 0} onChange={handleSelectAllCheckbox}></input></th>
                 <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"category")}>Category&lt;&gt;</button></th>
                 <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"name")}>Name&lt;&gt;</button></th>
                 <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"unitPrice")}>Price&lt;&gt;</button></th>

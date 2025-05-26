@@ -79,4 +79,9 @@ public class ProductController {
         productService.editStock(productId, 10);
         return productService.fetchProduct(productId);
     }
+
+    @DeleteMapping("/{productId}")
+    public void deleteInventoryProduct(@PathVariable String productId) {
+        productService.deleteProductById(productId);
+    }
 }
