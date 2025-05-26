@@ -1,6 +1,8 @@
 'use client';
+import { maxHeaderSize } from "http";
 import { useEffect, useState } from "react";
-var page=0
+import Select from "react-select";
+var pageTable=0
 var sortString: string = "";
 
 
@@ -14,12 +16,13 @@ export default function Home() {
   const getProducts = async (page: number, sort?: string, searchName?:string, searchCategory?: Array<string>, searchAvailability?: string) =>{
     try{
       let url = `http://localhost:9090/products?page=${page}`;
+      pageTable=page;
       if (sort) {
         url += `&sort=${sort}`;
         sortString = sort;}
       if (searchName !== undefined && searchName !== "") url += `&searchName=${searchName}`;
       if (searchCategory !== undefined && searchCategory.length) url += `&searchCategory=${searchCategory}`;
-      searchAvailability !== undefined ? url += `&searchAvailability=${searchAvailability}` : url += "&searchAvailability=All";
+      searchAvailability !== undefined && searchAvailability !=="" ? url += `&searchAvailability=${searchAvailability}` : url += "&searchAvailability=All";
       console.log("Fetching products from URL:", url);
       const response = await (await fetch(url)).json();
       console.log("Fetched products:", response);
@@ -112,7 +115,7 @@ export default function Home() {
 
   /** Run the function to fetch the products for the main table. */
   useEffect(() => {
-    getProducts(page);
+    getProducts(pageTable);
   }, []);
   
   /** Function that handles the pagination buttons below the table */
@@ -143,25 +146,48 @@ export default function Home() {
     );
   });
   
+  /** Code that handles the parameters and style for the multi-select 
+   * library. */
+  const categoryOptions = Array.from(categories.values()).map(category => ({
+    value: category.name,
+    label: category.name
+  }));
+  const customSelectStyles = {
+    control: (provided: any) => ({
+      ...provided,
+      border: "1px solid black",
+      width: "100%",
+      maxWidth: "500px",
+      height: "25px",
+      maxHeaderSize:"25px",
+      marginLeft: "2%",
+      marginTop: "10px"
+    }),
+  };
+
   /** Functions that handle the search parameters of the Search Block. */
   const [nameValue, setNameValue] = useState("");
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNameValue(e.target.value);
+    console.log("search name set to:", nameValue)
   };
-  const [categoryValue, setCategoryValue] = useState<string[]>([]);
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(e.target.selectedOptions, option => option.value);
-    setCategoryValue(selected);
+  const [categoryValue, setCategoryValue] = useState<{ value: string; label: string }[]>([]);
+  const handleCategoryChange = (selected: any) => {
+    setCategoryValue(selected || []);
+    console.log("search category(ies) set to:", selected ? selected.map((s: any) => s.value) : []);
   };
   const [availabilityValue, setAvailabilityValue] = useState("");
-  const handleAvailabilityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvailabilityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setAvailabilityValue(e.target.value);
+    console.log("search availability set to:", availabilityValue)
   };
 
   /** function that handles the Search button and does the searching. */
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    getProducts(page, sortString, nameValue, categoryValue, availabilityValue);
+    console.log("fetching product list with the following parameters: Name=",nameValue," Category(ies)=",categoryValue," Availability=",availabilityValue)
+    const selectedCategoryNames = categoryValue.map(c => c.value);
+    getProducts(pageTable, sortString, nameValue, selectedCategoryNames, availabilityValue);
   };
 
   /** Variables and function for the New Product Modal. */
@@ -237,20 +263,22 @@ export default function Home() {
   const handleCheckChange = () => {
     setShowCategoryInput((prev) => !prev);
   };
-
+  
   /** HTML code of the app that renders on http://localhost:8080 */
   return (
     <main>
       <div
         className="SearchBlock"
-        style={{ width: "98%", height: "155px", margin: "1%" }}>
+        style={{ width: "98%", height: "165px", marginLeft: "1%", marginRight:"1%", marginTop:"10px" }}>
         <form onSubmit={handleSearchSubmit} style={{border: "1px solid black", width:"100%", maxWidth: "500px", height:"100%", marginLeft: "auto",marginRight:"auto",textAlign:"center"}}>
-          <label htmlFor="name" style={{width:"300px", marginLeft:"auto",marginRight:"auto",}}>Name</label>
-          <input type="text" id="name" name="name" value={nameValue} onChange={() => {handleNameChange}} style={{ border: "1px solid black" , width:"35%", maxWidth: "200px", height: "25px", marginLeft:"2%", marginTop: "10px"}}></input><br></br>
-          <label htmlFor="categories" style={{width:"300px", textAlign:"center"}}>Category</label>
-          <select id="categories" name="categories" value={categoryValue} onChange={() => {handleCategoryChange}} style={{ border: "1px solid black", width:"30%", maxWidth: "300px", height: "25px", marginLeft:"2%", marginTop: "10px"}}>{getCategories}</select><br></br>
+          <label htmlFor="name" style={{width:"300px", marginLeft:"auto",marginRight:"auto"}}>Name</label>
+          <input type="text" id="name" name="name" value={nameValue} onChange={handleNameChange} style={{ border: "1px solid black" , width:"35%", maxWidth: "200px", height: "25px", marginLeft:"2%", marginTop: "10px"}}></input><br></br>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <label htmlFor="categories" style={{width:"80px", textAlign:"center"}}>Category</label>
+            <Select isMulti maxMenuHeight={150} options={categoryOptions} value={categoryValue} onChange={handleCategoryChange} placeholder="Select categories..." styles={customSelectStyles}></Select><br></br>
+          </div>
           <label htmlFor="availability" style={{width:"300px", textAlign:"center"}}>Availability</label>
-          <select id="availability" name="availability" value={availabilityValue} onChange={() => {handleAvailabilityChange}} style={{ border: "1px solid black", width:"28%", maxWidth: "500px",height:"25px", marginLeft:"2%", marginTop: "10px"}}>
+          <select id="availability" name="availability" value={availabilityValue} onChange={handleAvailabilityChange} style={{ border: "1px solid black", width:"28%", maxWidth: "500px",height:"25px", marginLeft:"2%", marginTop: "10px"}}>
             <option value="All">All</option>  
             <option value="In Stock">In Stock</option>
             <option value="Out of Stock">Out of Stock</option>
@@ -272,11 +300,11 @@ export default function Home() {
             <thead style={{border: "1px solid black"}}>
               <tr>
                 <th scope="col" style={{border: "1px solid black", width: "5%",textAlign:"center"}}><input type="checkbox"></input></th>
-                <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(page,"category")}>Category&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(page,"name")}>Name&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(page,"unitPrice")}>Price&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(page,"expirationDate")}>Expiration Date&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(page,"stock")}>Stock&lt;&gt;</button></th>
+                <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"category")}>Category&lt;&gt;</button></th>
+                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"name")}>Name&lt;&gt;</button></th>
+                <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"unitPrice")}>Price&lt;&gt;</button></th>
+                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"expirationDate")}>Expiration Date&lt;&gt;</button></th>
+                <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"stock")}>Stock&lt;&gt;</button></th>
                 <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px", textAlign:"center"}}>Actions&lt;&gt;</th>
               </tr>
             </thead>
