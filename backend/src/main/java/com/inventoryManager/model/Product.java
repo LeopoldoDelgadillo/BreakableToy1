@@ -33,7 +33,9 @@ public class Product {
         this.unitPrice = unitPrice;
         this.stock = stock;
         this.expirationDate = expirationDate;
-
+        this.creationDate = LocalDateTime.now();
+        this.updateDate = LocalDateTime.now();
+        this.productId = UUID.randomUUID().toString();
     }
 
     public Product(){
@@ -80,6 +82,14 @@ public class Product {
     public LocalDateTime getCreationDate() {
         return creationDate;
     }
+    public void setCreationDate(LocalDateTime creationDate){
+        if(getCreationDate()==null){
+            this.creationDate = creationDate;
+        }
+        else{
+            System.out.println("Error! This product already has creation date: "+getCreationDate());
+        }
+    }
 
     public LocalDateTime getUpdateDate(){
         return updateDate;
@@ -90,6 +100,14 @@ public class Product {
 
     public String getProductId(){
         return productId;
+    }
+    public void setProductId(){
+        if(getProductId()==null){
+            this.productId = UUID.randomUUID().toString();
+        }
+        else{
+            System.out.println("Error! This product already has an ID: "+getProductId());
+        }
     }
 }
 

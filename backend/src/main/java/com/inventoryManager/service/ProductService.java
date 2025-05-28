@@ -15,7 +15,7 @@ public interface ProductService{
 
     Product updateProduct(Product product, String productId);
 
-    void deleteProductById(String productId);
+    List<Product> deleteProductById(String productId);
 
     HashSet<String> getCategories();
 
