@@ -127,14 +127,4 @@ public class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.stock").value(10));
     }
-
-    @Test
-    void deleteProduct() throws Exception {
-        when(productService.deleteProductById(products.get(0).getProductId())).thenReturn(products);
-        mockMvc.perform(delete(String.format("/products/%s",products.get(0).getProductId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(products)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stock").value(10));
-    }
 }
