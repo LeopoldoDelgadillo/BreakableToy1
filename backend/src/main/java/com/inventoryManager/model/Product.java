@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.persistence.Entity;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -27,12 +28,12 @@ public class Product {
     private LocalDateTime updateDate;
     private String productId;
 
-    public Product(String name, String category, int unitPrice, int stock, LocalDateTime expirationDate){
+    public Product(String name, String category, int unitPrice, int stock, Optional<LocalDateTime> expirationDate){
         this.name = name;
         this.category = category;
         this.unitPrice = unitPrice;
         this.stock = stock;
-        this.expirationDate = expirationDate;
+        if(expirationDate.isPresent()){this.expirationDate = expirationDate.get();} else{this.expirationDate = null;}
         this.creationDate = LocalDateTime.now();
         this.updateDate = LocalDateTime.now();
         this.productId = UUID.randomUUID().toString();
