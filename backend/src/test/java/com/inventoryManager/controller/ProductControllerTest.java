@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 @WebMvcTest(ProductController.class)
@@ -41,9 +42,9 @@ public class ProductControllerTest {
     @BeforeEach
     void setUp() {
         products = List.of(
-                new Product("LED", "Electronics", 5, 20, LocalDateTime.of(2099, 12, 31, 23, 59, 59)),
-                new Product("Beef", "Food", 80, 15, LocalDateTime.of(2099, 12, 31, 23, 59, 59)),
-                new Product("Sausage", "Food", 45, 0, LocalDateTime.of(2099, 12, 31, 23, 59, 59))
+                new Product("LED", "Electronics", 5, 20, Optional.of(LocalDateTime.of(2099, 12, 31, 23, 59, 59))),
+                new Product("Beef", "Food", 80, 15, Optional.of(LocalDateTime.of(2099, 12, 31, 23, 59, 59))),
+                new Product("Sausage", "Food", 45, 0, Optional.of(LocalDateTime.of(2099, 12, 31, 23, 59, 59)))
         );
         listHolder = new PagedListHolder<>(productService.fetchProductList());
         listHolder.setPageSize(10);
