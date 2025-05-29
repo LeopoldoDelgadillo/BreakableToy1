@@ -598,7 +598,7 @@ export default function Home() {
       {showModal && productModal()}
       {editingProductId && editProduct(editingProductId)}
       {deletingProductId && deleteProduct(deletingProductId)}
-      <div title="ProudctTable">
+      <div title="ProductTable">
           <table className="table auto border rounded-md mx-auto flex max-w-200 w-auto">
             <thead className="border rounded-md">
               <tr>
