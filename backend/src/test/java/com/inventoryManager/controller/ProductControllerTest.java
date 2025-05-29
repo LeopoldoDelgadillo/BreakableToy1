@@ -75,7 +75,7 @@ public class ProductControllerTest {
 
     @Test
     void shouldAddProduct() throws Exception {
-        Product newProduct = new Product("Resistor", "Electronics", 5, 10, LocalDateTime.of(2099, 12, 31, 23, 59, 59));
+        Product newProduct = new Product("Resistor", "Electronics", 5, 10, Optional.of(LocalDateTime.of(2099, 12, 31, 23, 59, 59)));
 
         System.out.println(newProduct);
         when(productService.saveProduct(newProduct)).thenReturn(newProduct);
