@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.inventoryManager.InventoryManagerApplicationTests" time="0.822" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.inventoryManager.controller.ProductControllerTest" time="3.914" tests="5" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -63,9 +63,9 @@
     <property name="java.class.version" value="61.0"/>
     <property name="LOGGED_APPLICATION_NAME" value="[inventoryManager] "/>
   </properties>
-  <testcase name="contextLoads" classname="com.inventoryManager.InventoryManagerApplicationTests" time="0.005">
-    <system-out><![CDATA[2025-05-29T14:11:53.069-06:00  INFO 18164 --- [inventoryManager] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.inventoryManager.InventoryManagerApplicationTests]: InventoryManagerApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2025-05-29T14:11:53.083-06:00  INFO 18164 --- [inventoryManager] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.inventoryManager.InventoryManagerApplication for test class com.inventoryManager.InventoryManagerApplicationTests
+  <testcase name="shouldSetStockTo0" classname="com.inventoryManager.controller.ProductControllerTest" time="0.318">
+    <system-out><![CDATA[14:11:49.332 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.inventoryManager.controller.ProductControllerTest]: ProductControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+14:11:49.542 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.inventoryManager.InventoryManagerApplication for test class com.inventoryManager.controller.ProductControllerTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -76,9 +76,23 @@
 
  :: Spring Boot ::                (v3.4.5)
 
-2025-05-29T14:11:53.134-06:00  INFO 18164 --- [inventoryManager] [           main] c.i.InventoryManagerApplicationTests     : Starting InventoryManagerApplicationTests using Java 17.0.11 with PID 18164 (started by polit in D:\inventoryManagerGithub\backend)
-2025-05-29T14:11:53.134-06:00  INFO 18164 --- [inventoryManager] [           main] c.i.InventoryManagerApplicationTests     : No active profile set, falling back to 1 default profile: "default"
-2025-05-29T14:11:53.880-06:00  INFO 18164 --- [inventoryManager] [           main] c.i.InventoryManagerApplicationTests     : Started InventoryManagerApplicationTests in 0.787 seconds (process running for 5.422)
+2025-05-29T14:11:50.115-06:00  INFO 18164 --- [inventoryManager] [           main] c.i.controller.ProductControllerTest     : Starting ProductControllerTest using Java 17.0.11 with PID 18164 (started by polit in D:\inventoryManagerGithub\backend)
+2025-05-29T14:11:50.121-06:00  INFO 18164 --- [inventoryManager] [           main] c.i.controller.ProductControllerTest     : No active profile set, falling back to 1 default profile: "default"
+2025-05-29T14:11:52.545-06:00  INFO 18164 --- [inventoryManager] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2025-05-29T14:11:52.545-06:00  INFO 18164 --- [inventoryManager] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2025-05-29T14:11:52.548-06:00  INFO 18164 --- [inventoryManager] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2025-05-29T14:11:52.581-06:00  INFO 18164 --- [inventoryManager] [           main] c.i.controller.ProductControllerTest     : Started ProductControllerTest in 2.954 seconds (process running for 4.123)
+]]></system-out>
+  </testcase>
+  <testcase name="shouldAddProduct" classname="com.inventoryManager.controller.ProductControllerTest" time="0.068">
+    <system-out><![CDATA[com.inventoryManager.model.Product@5086623f
+Error! This product already has creation date: 2025-05-29T14:11:52.974143200
+]]></system-out>
+  </testcase>
+  <testcase name="shouldSetStockTo10" classname="com.inventoryManager.controller.ProductControllerTest" time="0.009"/>
+  <testcase name="shouldReturnPagedListHolder" classname="com.inventoryManager.controller.ProductControllerTest" time="0.048"/>
+  <testcase name="shouldEditProduct" classname="com.inventoryManager.controller.ProductControllerTest" time="0.015">
+    <system-out><![CDATA[Error! This product already has creation date: 2025-05-29T14:11:53.052339
 ]]></system-out>
   </testcase>
 </testsuite>

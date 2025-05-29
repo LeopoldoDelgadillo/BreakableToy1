@@ -31,7 +31,7 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Product updateProduct(Product product, String productId){
-        Product prodDB = productRepository.findById(productId).get();
+        Product prodDB = fetchProduct(productId);
 
         //update name
         if (Objects.nonNull(product.getName()) && !"".equalsIgnoreCase(product.getName())) {
@@ -59,8 +59,9 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public void deleteProductById(String productId){
+    public List<Product> deleteProductById(String productId){
         productRepository.deleteById(productId);
+        return fetchProductList();
     }
 
     private HashSet<String> categories = new HashSet<>();

@@ -1,8 +1,10 @@
 'use client';
 import { useEffect, useState } from "react";
 import Select from "react-select";
-var pageTable=0
-var sortString: string = "";
+let sortString: string = "";
+let searchNameGlobal: string;
+let searchCategoryGlobal: Array<string>;
+let searchAvailabilityGlobal: string;
 
 export default function Home() {
 
@@ -14,20 +16,19 @@ export default function Home() {
   const getProducts = async (page: number, sort?: string, searchName?:string, searchCategory?: Array<string>, searchAvailability?: string) =>{
     try{
       let url = `http://localhost:9090/products?page=${page}`;
-      pageTable=page;
       if (sort) {
         url += `&sort=${sort}`;
         sortString = sort;}
-      if (searchName !== undefined && searchName !== "") url += `&searchName=${searchName}`;
-      if (searchCategory !== undefined && searchCategory.length) url += `&searchCategory=${searchCategory}`;
-      searchAvailability !== undefined && searchAvailability !=="" ? url += `&searchAvailability=${searchAvailability}` : url += "&searchAvailability=All";
+      if (searchName !== undefined && searchName !== "") url += `&searchName=${searchName}`
+      if (searchCategory !== undefined && searchCategory.length) url += `&searchCategory=${searchCategory}`
+      searchAvailability !== undefined && searchAvailability !=="" ? url += `&searchAvailability=${searchAvailability}` : url += "&searchAvailability=All"
       console.log("Fetching products from URL:", url);
       const response = await (await fetch(url)).json();
       console.log("Fetched products:", response);
       setProductList(response.pageList);
       setProductPageCount(response.pageCount);
-      setProductCurrentPage(response.currentPage);
-      pagination()
+      setProductCurrentPage(response.page);
+      pagination();
       getProductStats();
     }catch (error){
       console.error("Error fetching products:", error);
@@ -41,7 +42,7 @@ export default function Home() {
     category: string,
     unitPrice: number,
     stock: number,
-    expirationDate: string,
+    expirationDate?: string,
     creationDate?: string,
     lastUpdate?: string
   }
@@ -68,7 +69,6 @@ export default function Home() {
   const categoriesMapping = productFullList.map((product:any) => {
     const categoryStat = categories.get(product.category);
     if (!categoryStat) {
-      console.log("Adding category:", product.category);
       categories.set(product.category, {
         name: product.category,
         totalStock: product.stock,
@@ -76,8 +76,6 @@ export default function Home() {
       });
     }
     else {
-      console.log("Updating category:", product.category);
-      console.log(product.category,"from", categoryStat.totalStock,"to", categoryStat.totalStock + product.stock);
       categoryStat.totalStock += product.stock;
       categoryStat.totalPrice += product.unitPrice * product.stock;
     }
@@ -87,7 +85,6 @@ export default function Home() {
    * we map them into the table in HTML. */
   categoriesMapping;
   const categoryRows = Array.from(categories.values()).map((categoryStat: categoryStats) => {
-    console.log("Adding rows:", categories);
     return(
       <tr key={categoryStat.name}>
         <td style={{textAlign:"center"}}>{categoryStat.name}</td>
@@ -126,6 +123,10 @@ export default function Home() {
       throw new Error('Failed to send data');
     }
   }
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const closeEditModal = () => {setShowEditModal(false);setEditingProductId(null);}
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   /** Functions that handle when checkbox changes state. */
   const [checkedProducts, setCheckedProducts] = useState<string[]>([]);
@@ -169,7 +170,7 @@ export default function Home() {
         body: JSON.stringify(product),
       });
       const result = await response.json();
-      location.reload();
+      getProducts(productCurrentPage, sortString, searchNameGlobal, searchCategoryGlobal,searchAvailabilityGlobal);
       return result;
     }
     catch(error){
@@ -180,30 +181,54 @@ export default function Home() {
 
   const handleEditSubmit = (e: React.FormEvent, id: string) => {
     e.preventDefault();
+    let editedProduct: Product;
     const productId = id;
     const formData = new FormData(e.target as HTMLFormElement);
     let name = formData.get("name") as string;
     let category = formData.get("category") as string;
     let unitPrice = parseFloat(formData.get("unitPrice") as string);
     let stock = parseInt(formData.get("stock") as string, 10);
-    let expirationDate = formData.get("expirationDate") as string;
-    const expirationDatePart1 = expirationDate.split('T')[0]
-    const expirationDatePart2 = expirationDate.split('T')[1]
-    expirationDate = expirationDatePart1+" "+expirationDatePart2;
-    const editedProduct: Product = {
-      name: name,
-      category: category,
-      unitPrice: unitPrice,
-      stock: stock,
-      expirationDate: expirationDate
-    }
-    sendEditedProduct(editedProduct,productId)
-    console.log("Submitting product:", { name, category, unitPrice, stock, expirationDate });
+    console.log("Checking expiration date...");
+    if(formData.get("expirationDate") != null){
+        let expirationDate = formData.get("expirationDate") as string;
+        const expirationDatePart1 = expirationDate.split('T')[0]
+        const expirationDatePart2 = expirationDate.split('T')[1]
+        expirationDate = expirationDatePart1+" "+expirationDatePart2;
+        console.log(expirationDate);
+        editedProduct = {
+          name,
+          category,
+          unitPrice,
+          stock,
+          expirationDate
+        };
+      }
+      else{
+        console.log("No expiration date");
+        editedProduct = {
+        name,
+        category,
+        unitPrice,
+        stock
+        };
+      }
+    sendEditedProduct(editedProduct,productId);
+    closeEditModal();
   }
 
-  const [showEditModal, setShowEditModal] = useState(false);
-  const closeEditModal = () => {setShowEditModal(false);setEditingProductId(null);}
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  /** Variable and function to handle the new category check on the modal. */
+  const [showCategoryInput, setShowCategoryInput] = useState(false);
+  const handleCheckChange = () => {
+    setShowCategoryInput((prev) => !prev);
+  };
+
+  /** Variable and function to handle the expiration date check on the modal. */
+  const [showExpirationInput, setShowExpirationInput] = useState(false);
+  const handleExpirationChange = () => {
+    setShowExpirationInput((prev) => !prev);
+  };
+
+  
   const editProduct = (productId: string) => (
     <div 
         className="modal"
@@ -244,7 +269,21 @@ export default function Home() {
               <label htmlFor="stock">Stock</label>
               <input type="number" id="stock" name="stock" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.stock}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
               <label htmlFor="expirationDate">Expiration Date</label>
-              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.expirationDate}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required /><br></br>
+              {!showExpirationInput ? (
+              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.expirationDate}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required />
+              ) : (
+              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" defaultValue={undefined} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} disabled/>
+              )}
+              <label>
+                <input 
+                  type="checkbox" 
+                  id="check" 
+                  checked={showExpirationInput}
+                  onChange={handleExpirationChange}
+                  style={{marginLeft:"10px",marginRight:"3px"}}/>
+                  No Expiration Date
+              </label><br></br>
+              <br></br>
               <button type="submit" style={{ border:"1px solid black" ,width:"55px", marginTop:"10px"}}>Save</button>
             </form>
           </div>
@@ -278,7 +317,8 @@ export default function Home() {
               .then(response => {
                 if (response.ok) {
                   console.log("Product deleted successfully");
-                  location.reload();
+                  getProducts(productCurrentPage, sortString, searchNameGlobal, searchCategoryGlobal,searchAvailabilityGlobal);
+                  closeDeleteModal();
                 } else {
                   console.error("Failed to delete product");
                 }
@@ -293,15 +333,28 @@ export default function Home() {
   /** Function that uses the fetched list of products
    * and maps it to the table in HTML. */
   const productRows = productList.map((product:any) => {
+    let expirationDateValue: number | null = null; 
+    if(product.expirationDate!=null){
+      expirationDateValue = new Date(product.expirationDate).getTime();
+    }
     return (
     <tr key={product.productId}>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}><input type="checkbox" value={product.productId} checked={checkedProducts.includes(String(product.productId))} onChange={handleProductCheckbox}></input></td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.category}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.name}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.unitPrice}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.expirationDate.toString()}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}>{product.stock}</td>
-      <td style={{ border: "1px solid gray", textAlign:"center"}}><button value={product.productId} onClick={() => setEditingProductId(product.productId)}><strong>Edit</strong></button>/<button onClick={() => setDeletingProductId(product.productId)}><strong>Delete</strong></button></td>
+      <td className="border border-gray-400 text-center"><input type="checkbox" value={product.productId} checked={checkedProducts.includes(String(product.productId))} onChange={handleProductCheckbox}></input></td>
+      <td className="border border-gray-400 text-center">{product.category}</td>
+      <td className="border border-gray-400 text-center">{product.name}</td>
+      <td className="border border-gray-400 text-center">{product.unitPrice}</td>
+      { expirationDateValue != null ? (
+        expirationDateValue - Date.now() > 1123200000 ? (<td className="border border-gray-400 bg-green-300 text-center">{product.expirationDate.toString()}</td>) :
+        expirationDateValue - Date.now() <= 1123199999 && expirationDateValue - Date.now() >= 518400001 ? (<td className="border border-gray-400 bg-orange-300 text-center">{product.expirationDate.toString()}</td>) :
+        (<td className="border border-gray-400 bg-red-300 text-center">{product.expirationDate.toString()}</td>)
+      ) :
+        (<td className="border border-gray-400 text-center">N/A</td>)
+      }
+      { product.stock < 5 ? (<td className="border border-gray-400 bg-red-400 text-center">{product.stock}</td>) :
+        product.stock >= 5 && product.stock <= 10 ? (<td className="border border-gray-400 bg-orange-300 text-center">{product.stock}</td>) :
+        (<td className="border border-gray-400 text-center">{product.stock}</td>)
+      }
+      <td className="border border-gray-400 text-center"><button value={product.productId} onClick={() => setEditingProductId(product.productId)}><strong>Edit</strong></button>/<button onClick={() => setDeletingProductId(product.productId)}><strong>Delete</strong></button></td>
     </tr>
     );
   });
@@ -316,7 +369,7 @@ export default function Home() {
 
   /** Run the function to fetch the products for the main table. */
   useEffect(() => {
-    getProducts(pageTable);
+    getProducts(productCurrentPage);
   }, []);
   
   /** Function that handles the pagination buttons below the table */
@@ -325,11 +378,11 @@ export default function Home() {
     for (let i = 0; i < productPageCount; i++) {
       pages.push(
         i === productCurrentPage ? (
-        <button key={i} onClick={() => getProducts(i,sortString)} style={{color: "blue", fontWeight: "bold", WebkitTextFillColor: "blue"}}>
-          {i + 1}
+        <button key={i} className="text-blue-500 underline mr-auto ml-auto w-auto" onClick={() => getProducts(i,sortString,searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>
+          <span>{i + 1}</span>
         </button>
         ) : (
-          <button key={i} onClick={() => getProducts(i,sortString)}>
+          <button key={i} className="mr-auto ml-auto w-auto" onClick={() => getProducts(i,sortString,searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>
             {i + 1}
           </button>
         )
@@ -353,17 +406,6 @@ export default function Home() {
     value: category.name,
     label: category.name
   }));
-  const customSelectStyles = {
-    control: (provided: any) => ({
-      ...provided,
-      border: "1px solid black",
-      width: "100%",
-      maxWidth: "500px",
-      height: "25px",
-      marginLeft: "2%",
-      marginTop: "10px"
-    }),
-  };
 
   /** Functions that handle the search parameters of the Search Block. */
   const [nameValue, setNameValue] = useState("");
@@ -377,7 +419,7 @@ export default function Home() {
     console.log("search category(ies) set to:", selected ? selected.map((s: any) => s.value) : []);
   };
   const [availabilityValue, setAvailabilityValue] = useState("");
-  const handleAvailabilityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleAvailabilityChange = (e: any) => {
     setAvailabilityValue(e.target.value);
     console.log("search availability set to:", availabilityValue)
   };
@@ -387,13 +429,20 @@ export default function Home() {
     e.preventDefault();
     console.log("fetching product list with the following parameters: Name=",nameValue," Category(ies)=",categoryValue," Availability=",availabilityValue)
     const selectedCategoryNames = categoryValue.map(c => c.value);
-    getProducts(pageTable, sortString, nameValue, selectedCategoryNames, availabilityValue);
+    searchCategoryGlobal = selectedCategoryNames;
+    searchNameGlobal = nameValue;
+    searchAvailabilityGlobal = availabilityValue;
+    getProducts(productCurrentPage, sortString, nameValue, selectedCategoryNames, availabilityValue);
   };
 
   /** Variables and function for the New Product Modal. */
   const [showModal, setShowModal] = useState(false);
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
+  const [showNewExpirationInput, setShowNewExpirationInput] = useState(false);
+  const handleNewExpirationChange = () => {
+    setShowNewExpirationInput((prev) => !prev);
+  };
 
   /**Function that handles the modal creation and options. */
   const productModal = () => (
@@ -436,7 +485,20 @@ export default function Home() {
               <label htmlFor="stock">Stock</label>
               <input type="number" id="stock" name="stock" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
               <label htmlFor="expirationDate">Expiration Date</label>
-              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required /><br></br>
+              {!showNewExpirationInput ? (
+              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required />
+              ) : (
+              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} disabled/>
+              )}
+              <label>
+                <input 
+                  type="checkbox" 
+                  id="check" 
+                  checked={showNewExpirationInput}
+                  onChange={handleNewExpirationChange}
+                  style={{marginLeft:"10px",marginRight:"3px"}}/>
+                  No Expiration Date
+              </label><br></br>
               <button type="submit" style={{ border:"1px solid black" ,width:"55px", marginTop:"10px"}}>Create</button>
             </form>
           </div>
@@ -455,7 +517,7 @@ export default function Home() {
         body: JSON.stringify(product),
       });
       const result = await response.json();
-      location.reload();
+      getProducts(productCurrentPage, sortString, searchNameGlobal, searchCategoryGlobal,searchAvailabilityGlobal);
       return result;
     }
     catch(error){
@@ -468,58 +530,67 @@ export default function Home() {
    * the new product information to the database. */
   const handleModalSubmit = (e: React.FormEvent) => {
       e.preventDefault();
+      let newProduct: Product;
       const formData = new FormData(e.target as HTMLFormElement);
       let name = formData.get("name") as string;
       let category = formData.get("category") as string;
       let unitPrice = parseFloat(formData.get("unitPrice") as string);
       let stock = parseInt(formData.get("stock") as string, 10);
-      let expirationDate = formData.get("expirationDate") as string;
-      const expirationDatePart1 = expirationDate.split('T')[0]
-      const expirationDatePart2 = expirationDate.split('T')[1]
-      expirationDate = expirationDatePart1+" "+expirationDatePart2+":00";
-      const newProduct: Product = {
-        name: name,
-        category: category,
-        unitPrice: unitPrice,
-        stock: stock,
-        expirationDate: expirationDate
+      if(formData.get("expirationDate") != null){
+        let expirationDate = formData.get("expirationDate") as string;
+        const expirationDatePart1 = expirationDate.split('T')[0]
+        const expirationDatePart2 = expirationDate.split('T')[1]
+        expirationDate = expirationDatePart1+" "+expirationDatePart2+":00";
+        newProduct = {
+          name,
+          category,
+          unitPrice,
+          stock,
+          expirationDate
+        };
       }
-      sendNewProduct(newProduct)
-      console.log("Submitting product:", { name, category, unitPrice, stock, expirationDate });
+      else{
+        newProduct = {
+        name,
+        category,
+        unitPrice,
+        stock
+        };
+      }
+      sendNewProduct(newProduct);
+      closeModal();
   }
-
-  /** Variable and function to handle the new category check on the modal. */
-  const [showCategoryInput, setShowCategoryInput] = useState(false);
-  const handleCheckChange = () => {
-    setShowCategoryInput((prev) => !prev);
-  };
 
   /** HTML code of the app that renders on http://localhost:8080 */
   return (
     <main>
       <div
-        className="SearchBlock"
-        style={{ width: "98%", height: "165px", marginLeft: "1%", marginRight:"1%", marginTop:"10px" }}>
-        <form onSubmit={handleSearchSubmit} style={{border: "1px solid black", width:"100%", maxWidth: "500px", height:"100%", marginLeft: "auto",marginRight:"auto",textAlign:"center"}}>
-          <label htmlFor="name" style={{width:"300px", marginLeft:"auto",marginRight:"auto"}}>Name</label>
-          <input type="text" id="name" name="name" value={nameValue} onChange={handleNameChange} style={{ border: "1px solid black" , width:"35%", maxWidth: "200px", height: "25px", marginLeft:"2%", marginTop: "10px"}}></input><br></br>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <label htmlFor="categories" style={{width:"80px", textAlign:"center"}}>Category</label>
-            <Select isMulti maxMenuHeight={150} options={categoryOptions} value={categoryValue} onChange={handleCategoryChange} placeholder="Select categories..." styles={customSelectStyles}></Select><br></br>
+        title="SearchBlock"
+        className="mx-auto flex max-w-sm">
+        <form className="max-w-sm mx-auto border rounded-lg mt-2" onSubmit={handleSearchSubmit}>
+          <div className="mx-auto flex max-w-sm mt-5">
+            <label htmlFor="name" className="ml-2">Name</label>
+            <input type="text" id="name" name="name" className="flex border rounded-md mr-2 ml-auto" value={nameValue} onChange={handleNameChange}></input><br></br>
           </div>
-          <label htmlFor="availability" style={{width:"300px", textAlign:"center"}}>Availability</label>
-          <select id="availability" name="availability" value={availabilityValue} onChange={handleAvailabilityChange} style={{ border: "1px solid black", width:"28%", maxWidth: "500px",height:"25px", marginLeft:"2%", marginTop: "10px"}}>
-            <option value="All">All</option>  
-            <option value="In Stock">In Stock</option>
-            <option value="Out of Stock">Out of Stock</option>
-          </select><br></br>
-          <button type="submit" style={{border: "1px solid black",width: "120px", height:"25px", marginTop: "10px", textAlign:"center", marginLeft: "auto",marginRight:"auto"}}>Search</button>
+          <div className="mx-auto flex max-w-sm mt-5">
+            <label htmlFor="categories" className="ml-2">Category</label>
+            <Select isMulti maxMenuHeight={150} options={categoryOptions} className="w-auto max-w-50 mr-2 ml-5" value={categoryValue} onChange={handleCategoryChange} placeholder="Select categories..."></Select><br></br>
+          </div>
+          <div className="mx-auto flex max-w-sm mt-5">
+            <label htmlFor="availability" className="ml-2">Availability</label>
+            <select id="availability" name="availability" className="flex border rounded-md h-8 w-45 mr-2 ml-auto" value={availabilityValue} onChange={handleAvailabilityChange}>
+              <option value="All">All</option>  
+              <option value="In Stock">In Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select><br></br>
+          </div>
+            <button type="submit" className=" mx-auto flex max-w-sm border rounded-sm mt-5 mb-3 w-15 text-center" ><label className="mr-auto ml-auto w-auto">Search</label></button>
         </form>
       </div>
-      <div style={{width:"120px", marginLeft: "auto", marginRight: "auto",marginTop: "10px", marginBottom: "10px", textAlign: "center"}}>
+      <div title="NewProductButton" className=" mx-auto flex max-w-md border rounded-sm mt-3 mb-3 w-30 text-center">
         <button 
           type="button"
-          style={{border: "1px solid black",width:"120px"}}
+          className="mr-auto ml-auto w-auto"
           onClick={openModal}>
             New Product
         </button>
@@ -527,35 +598,35 @@ export default function Home() {
       {showModal && productModal()}
       {editingProductId && editProduct(editingProductId)}
       {deletingProductId && deleteProduct(deletingProductId)}
-      <div>
-          <table style={{border: "1px solid black", width: "98%",maxWidth:"1000px", marginLeft: "auto",marginRight: "auto", fontSize: "14px"}}>
-            <thead style={{border: "1px solid black"}}>
+      <div title="ProductTable">
+          <table className="table auto border rounded-md mx-auto flex max-w-200 w-auto">
+            <thead className="border rounded-md">
               <tr>
-                <th scope="col" style={{border: "1px solid black", width: "5%",textAlign:"center"}}><input type="checkbox" checked={checkedProducts.length === productList.length && productList.length > 0} onChange={handleSelectAllCheckbox}></input></th>
-                <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"category")}>Category&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"name")}>Name&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"unitPrice")}>Price&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "25%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"expirationDate")}>Expiration Date&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "7.5%", margin: "10px", textAlign:"center"}}><button onClick={() => getProducts(pageTable,"stock")}>Stock&lt;&gt;</button></th>
-                <th scope="col" style={{border: "1px solid black", width: "20%", margin: "10px", textAlign:"center"}}>Actions&lt;&gt;</th>
+                <th scope="col" className="border w-5"><input type="checkbox" checked={checkedProducts.length === productList.length && productList.length > 0} onChange={handleSelectAllCheckbox}></input></th>
+                <th scope="col" className="border w-30"><button onClick={() => getProducts(productCurrentPage,"category")}>Category&lt;&gt;</button></th>
+                <th scope="col" className="border w-30"><button onClick={() => getProducts(productCurrentPage,"name")}>Name&lt;&gt;</button></th>
+                <th scope="col" className="border w-20"><button onClick={() => getProducts(productCurrentPage,"unitPrice")}>Price&lt;&gt;</button></th>
+                <th scope="col" className="border w-45"><button onClick={() => getProducts(productCurrentPage,"expirationDate")}>Expiration Date&lt;&gt;</button></th>
+                <th scope="col" className="border w-20"><button onClick={() => getProducts(productCurrentPage,"stock")}>Stock&lt;&gt;</button></th>
+                <th scope="col" className="border w-25">Actions&lt;&gt;</th>
               </tr>
             </thead>
-            <tbody style={{border: "1px solid black", width: "98%", fontSize: "14px"}}>
+            <tbody>
                 {productRows}
             </tbody>
           </table>
-        <div style={{border: "1px solid black", width: "50%", maxWidth: "300px" , height: "25px", marginLeft: "auto", marginRight: "auto", marginTop: "10px", textAlign: "center"}}>
+        <div title="Pagination" className=" mx-auto flex max-w-md border rounded-sm mt-3 mb-3 w-10 text-center">
             {pagination()}
         </div>
       </div>
-      <div>
-        <table style={{border: "1px solid black", width: "98%", maxWidth:"1000px", maxHeight:"200px", marginTop: "10px", marginLeft: "auto", marginRight: "auto", textAlign: "center", fontSize: "13px"}}>
+      <div title="CategoryMetrics">
+        <table className="table auto border rounded-md mx-auto flex max-w-200 w-auto mt-2 ">
           <thead>
             <tr>
-              <th style={{width: "22%",textAlign:"center"}}>Category</th>
-              <th style={{width: "22%",textAlign:"center"}}>Total product in Stock</th>
-              <th style={{width: "22%",textAlign:"center"}}>Total value in Stock</th>
-              <th style={{width: "22%",textAlign:"center"}}>Average price in Stock</th>
+              <th scope="col" className="border w-30">Category</th>
+              <th scope="col" className="border w-30">Total product in Stock</th>
+              <th scope="col" className="border w-30">Total value in Stock</th>
+              <th scope="col" className="border w-30">Average price in Stock</th>
             </tr>
           </thead>
           <tbody>
@@ -564,7 +635,6 @@ export default function Home() {
         </table>
       </div>
     </main>
-    
   );
 }
 

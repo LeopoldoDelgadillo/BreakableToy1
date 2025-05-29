@@ -29,7 +29,7 @@ public class ProductController {
                                             @RequestParam(required = false) List<String> searchCategory,
                                             @RequestParam(required = false) String searchAvailability) {
         PagedListHolder<Product> listHolder;
-        if (searchName == null && searchCategory == null && searchAvailability == "All") {
+        if (searchName == null && searchCategory == null && (searchAvailability==null||searchAvailability.equals("All")) ) {
             listHolder = new PagedListHolder<>(productService.fetchProductList());
         }
         else{listHolder = new PagedListHolder<>(productService.inventorySearch(searchName, searchCategory, searchAvailability));}
@@ -81,7 +81,8 @@ public class ProductController {
     }
 
     @DeleteMapping("/{productId}")
-    public void deleteInventoryProduct(@PathVariable String productId) {
+    public List<Product> deleteInventoryProduct(@PathVariable String productId) {
         productService.deleteProductById(productId);
+        return productService.fetchProductList();
     }
 }
