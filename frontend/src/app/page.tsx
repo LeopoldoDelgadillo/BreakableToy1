@@ -1,6 +1,7 @@
 'use client';
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import Select from "react-select";
+const Select = dynamic(() => import("react-select"), { ssr: false });
 let sortString: string = "";
 let searchNameGlobal: string;
 let searchCategoryGlobal: Array<string>;
@@ -12,7 +13,8 @@ export default function Home() {
    * that are going to appear on the table. */
   const[productList, setProductList] = useState<Product[]>([]);
   const[productPageCount, setProductPageCount] = useState(0);
-  const[productCurrentPage, setProductCurrentPage] = useState(0);
+  const[productCurrentPage, setProductCurrentPage] = useState(0)
+  
   const getProducts = async (page: number, sort?: string, searchName?:string, searchCategory?: Array<string>, searchAvailability?: string) =>{
     try{
       let url = `http://localhost:9090/products?page=${page}`;
@@ -87,10 +89,10 @@ export default function Home() {
   const categoryRows = Array.from(categories.values()).map((categoryStat: categoryStats) => {
     return(
       <tr key={categoryStat.name}>
-        <td style={{textAlign:"center"}}>{categoryStat.name}</td>
-        <td style={{textAlign:"center"}}>{categoryStat.totalStock}</td>
-        <td style={{textAlign:"center"}}>{categoryStat.totalPrice}</td>
-        <td style={{textAlign:"center"}}>{categoryStat.totalStock==0 ? 0 : (categoryStat.totalPrice / categoryStat.totalStock).toFixed(2)}</td>
+        <td className="border border-gray-400 text-center">{categoryStat.name}</td>
+        <td className="border border-gray-400 text-center">{categoryStat.totalStock}</td>
+        <td className="border border-gray-400 text-center">{categoryStat.totalPrice}</td>
+        <td className="border border-gray-400 text-center">{categoryStat.totalStock==0 ? 0 : (categoryStat.totalPrice / categoryStat.totalStock).toFixed(2)}</td>
       </tr>
     );
   });
@@ -353,7 +355,7 @@ export default function Home() {
         product.stock >= 5 && product.stock <= 10 ? (<td className="border border-gray-400 bg-orange-300 text-center">{product.stock}</td>) :
         (<td className="border border-gray-400 text-center">{product.stock}</td>)
       }
-      <td className="border border-gray-400 text-center"><button value={product.productId} onClick={() => setEditingProductId(product.productId)}><strong>Edit</strong></button>/<button onClick={() => setDeletingProductId(product.productId)}><strong>Delete</strong></button></td>
+      <td className="border border-gray-400 text-center"><button className="cursor-pointer" value={product.productId} onClick={() => setEditingProductId(product.productId)}><strong>Edit</strong></button>/<button className="cursor-pointer" onClick={() => setDeletingProductId(product.productId)}><strong>Delete</strong></button></td>
     </tr>
     );
   });
@@ -377,11 +379,11 @@ export default function Home() {
     for (let i = 0; i < productPageCount; i++) {
       pages.push(
         i === productCurrentPage ? (
-        <button key={i} className="text-blue-500 underline mr-auto ml-auto w-auto" onClick={() => getProducts(i,sortString,searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>
+        <button key={i} className="text-blue-500 underline mr-2 ml-2 w-auto cursor-pointer" onClick={() => getProducts(i,sortString,searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>
           <span>{i + 1}</span>
         </button>
         ) : (
-          <button key={i} className="mr-auto ml-auto w-auto" onClick={() => getProducts(i,sortString,searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>
+          <button key={i} className="mr-2 ml-2 w-auto cursor-pointer" onClick={() => getProducts(i,sortString,searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>
             {i + 1}
           </button>
         )
@@ -560,6 +562,9 @@ export default function Home() {
       closeModal();
   }
 
+  const sortArrow = () => {
+
+  }
   /** HTML code of the app that renders on http://localhost:8080 */
   return (
     <main>
@@ -573,7 +578,7 @@ export default function Home() {
           </div>
           <div className="mx-auto flex max-w-sm mt-5">
             <label htmlFor="categories" className="ml-2">Category</label>
-            <Select isMulti maxMenuHeight={150} options={categoryOptions} className="w-auto max-w-50 mr-2 ml-5" value={categoryValue} onChange={handleCategoryChange} placeholder="Select categories..."></Select><br></br>
+            <Select isMulti maxMenuHeight={150} instanceId="selectId" options={categoryOptions} className="w-auto max-w-50 mr-2 ml-5" value={categoryValue} onChange={handleCategoryChange} placeholder="Select categories..."></Select><br></br>
           </div>
           <div className="mx-auto flex max-w-sm mt-5">
             <label htmlFor="availability" className="ml-2">Availability</label>
@@ -583,13 +588,13 @@ export default function Home() {
               <option value="Out of Stock">Out of Stock</option>
             </select><br></br>
           </div>
-            <button type="submit" className=" mx-auto flex max-w-sm border rounded-sm mt-5 mb-3 w-15 text-center" ><label className="mr-auto ml-auto w-auto">Search</label></button>
+            <button type="submit" className=" mx-auto flex max-w-sm border rounded-sm mt-5 mb-3 w-15 text-center cursor-pointer" ><label className="mr-auto ml-auto w-auto cursor-pointer">Search</label></button>
         </form>
       </div>
-      <div title="NewProductButton" className=" mx-auto flex max-w-md border rounded-sm mt-3 mb-3 w-30 text-center">
+      <div title="NewProductButton" className=" mx-auto flex max-w-md border rounded-sm mt-3 mb-3 w-30 text-center cursor-pointer">
         <button 
           type="button"
-          className="mr-auto ml-auto w-auto"
+          className="mr-auto ml-auto w-auto cursor-pointer"
           onClick={openModal}>
             New Product
         </button>
@@ -602,19 +607,44 @@ export default function Home() {
             <thead className="border rounded-md">
               <tr>
                 <th scope="col" className="border w-5"><input type="checkbox" checked={checkedProducts.length === productList.length && productList.length > 0} onChange={handleSelectAllCheckbox}></input></th>
-                <th scope="col" className="border w-30"><button onClick={() => getProducts(productCurrentPage,"category")}>Category&lt;&gt;</button></th>
-                <th scope="col" className="border w-30"><button onClick={() => getProducts(productCurrentPage,"name")}>Name&lt;&gt;</button></th>
-                <th scope="col" className="border w-20"><button onClick={() => getProducts(productCurrentPage,"unitPrice")}>Price&lt;&gt;</button></th>
-                <th scope="col" className="border w-45"><button onClick={() => getProducts(productCurrentPage,"expirationDate")}>Expiration Date&lt;&gt;</button></th>
-                <th scope="col" className="border w-20"><button onClick={() => getProducts(productCurrentPage,"stock")}>Stock&lt;&gt;</button></th>
-                <th scope="col" className="border w-25">Actions&lt;&gt;</th>
+                { sortString == "category" ? 
+                (<th scope="col" className="border w-30"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"category",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Category&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+                  </svg>&gt;</div></button></th>) :
+                (<th scope="col" className="border w-30"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"category",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Category&lt;&gt;</button></th>)
+                }
+                { sortString == "name" ? 
+                (<th scope="col" className="border w-30"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"name",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Name&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+                  </svg>&gt;</div></button></th>) :
+                (<th scope="col" className="border w-30"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"name",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Name&lt;&gt;</button></th>)
+                }
+                { sortString == "unitPrice" ?
+                (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"unitPrice",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Price&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+</svg>&gt;</div></button></th>) :
+                (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"unitPrice",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Price&lt;&gt;</button></th>)
+                }
+                { sortString == "expirationDate" ?
+                (<th scope="col" className="border w-45"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"expirationDate",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Expiration Date&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+</svg>&gt;</div></button></th>) :
+                (<th scope="col" className="border w-45"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"expirationDate",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Expiration Date&lt;&gt;</button></th>)
+                }
+                { sortString == "stock" ?
+                (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"stock",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Stock&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+</svg>&gt;</div></button></th>) :
+                (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"stock",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Stock&lt;&gt;</button></th>)
+                }
+                <th scope="col" className="border w-25">Actions</th>
               </tr>
             </thead>
             <tbody>
                 {productRows}
             </tbody>
           </table>
-        <div title="Pagination" className=" mx-auto flex max-w-md border rounded-sm mt-3 mb-3 w-10 text-center">
+        <div title="Pagination" className="flex-auto max-w-lg border rounded-sm mt-3 mb-3 w-fit mr-auto ml-auto">
             {pagination()}
         </div>
       </div>
