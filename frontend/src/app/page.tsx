@@ -19,8 +19,9 @@ export default function Home() {
     try{
       let url = `http://localhost:9090/products?page=${page}`;
       if (sort) {
-        url += `&sort=${sort}`;
-        sortString = sort;}
+        sortString != sort ? sortString = sort : sortString = ""
+        url += `&sort=${sortString}`;
+      }
       if (searchName !== undefined && searchName !== "") url += `&searchName=${searchName}`
       if (searchCategory !== undefined && searchCategory.length) url += `&searchCategory=${searchCategory}`
       searchAvailability !== undefined && searchAvailability !=="" ? url += `&searchAvailability=${searchAvailability}` : url += "&searchAvailability=All"
@@ -571,7 +572,7 @@ export default function Home() {
       <div
         title="SearchBlock"
         className="mx-auto flex max-w-500">
-        <form className="max-w-500 mx-auto border rounded-lg mt-2" onSubmit={handleSearchSubmit}>
+        <form className="max-w-500 mx-auto border rounded-lg mt-5" onSubmit={handleSearchSubmit}>
           <div className="mx-auto flex max-w-sm mt-5">
             <label htmlFor="name" className="ml-2">Name</label>
             <input type="text" id="name" name="name" className="flex border rounded-md mr-2 ml-auto" value={nameValue} onChange={handleNameChange}></input><br></br>
@@ -591,7 +592,7 @@ export default function Home() {
             <button type="submit" className=" mx-auto flex max-w-sm border rounded-sm mt-5 mb-3 w-15 text-center cursor-pointer" ><label className="mr-auto ml-auto w-auto cursor-pointer">Search</label></button>
         </form>
       </div>
-      <div title="NewProductButton" className=" mx-auto flex max-w-md border rounded-sm mt-3 mb-3 w-30 text-center cursor-pointer">
+      <div title="NewProductButton" className=" mx-auto flex max-w-md border rounded-sm mt-5 mb-3 w-30 text-center cursor-pointer">
         <button 
           type="button"
           className="mr-auto ml-auto w-auto cursor-pointer"
@@ -603,7 +604,7 @@ export default function Home() {
       {editingProductId && editProduct(editingProductId)}
       {deletingProductId && deleteProduct(deletingProductId)}
       <div title="ProductTable">
-          <table className="table auto border rounded-md mx-auto flex max-w-200 w-auto">
+          <table className="table auto border rounded-md mx-auto flex max-w-200 w-auto mt-5">
             <thead className="border rounded-md">
               <tr>
                 <th scope="col" className="border w-5"><input type="checkbox" checked={checkedProducts.length === productList.length && productList.length > 0} onChange={handleSelectAllCheckbox}></input></th>
@@ -644,12 +645,12 @@ export default function Home() {
                 {productRows}
             </tbody>
           </table>
-        <div title="Pagination" className="flex-auto max-w-lg border rounded-sm mt-3 mb-3 w-fit mr-auto ml-auto">
+        <div title="Pagination" className="flex-auto max-w-lg border rounded-sm mt-5 w-fit mr-auto ml-auto">
             {pagination()}
         </div>
       </div>
       <div title="CategoryMetrics">
-        <table className="table auto border rounded-md mx-auto flex max-w-200 w-175 mt-2 ">
+        <table className="table auto border rounded-md mx-auto flex max-w-200 w-175 mt-5 ">
           <thead>
             <tr>
               <th scope="col" className="border w-30">Category</th>
