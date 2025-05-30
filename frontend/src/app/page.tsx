@@ -621,20 +621,20 @@ export default function Home() {
                 }
                 { sortString == "unitPrice" ?
                 (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"unitPrice",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Price&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
-</svg>&gt;</div></button></th>) :
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+                  </svg>&gt;</div></button></th>) :
                 (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"unitPrice",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Price&lt;&gt;</button></th>)
                 }
                 { sortString == "expirationDate" ?
                 (<th scope="col" className="border w-45"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"expirationDate",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Expiration Date&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
-</svg>&gt;</div></button></th>) :
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+                  </svg>&gt;</div></button></th>) :
                 (<th scope="col" className="border w-45"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"expirationDate",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Expiration Date&lt;&gt;</button></th>)
                 }
                 { sortString == "stock" ?
                 (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"stock",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}><div className="flex">Stock&lt;<svg xmlns="http://www.w3.org/2000/svg" fill="none" strokeWidth="1.5" stroke="currentColor" className="size-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
-</svg>&gt;</div></button></th>) :
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+                  </svg>&gt;</div></button></th>) :
                 (<th scope="col" className="border w-20"><button className="cursor-pointer" onClick={() => getProducts(productCurrentPage,"stock",searchNameGlobal,searchCategoryGlobal,searchAvailabilityGlobal)}>Stock&lt;&gt;</button></th>)
                 }
                 <th scope="col" className="border w-25">Actions</th>
