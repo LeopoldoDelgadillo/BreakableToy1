@@ -194,7 +194,6 @@ export default function Home() {
         const expirationDatePart1 = expirationDate.split('T')[0]
         const expirationDatePart2 = expirationDate.split('T')[1]
         expirationDate = expirationDatePart1+" "+expirationDatePart2;
-        console.log(expirationDate);
         editedProduct = {
           name,
           category,
@@ -270,9 +269,9 @@ export default function Home() {
               <input type="number" id="stock" name="stock" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.stock}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
               <label htmlFor="expirationDate">Expiration Date</label>
               {!showExpirationInput ? (
-              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.expirationDate}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required />
+              <input type="datetime-local"  step="1" id="expirationDate" name="expirationDate" defaultValue={`${productList.find((p) => String(p.productId) === String(productId))?.expirationDate}`} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required />
               ) : (
-              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" defaultValue={undefined} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} disabled/>
+              <input type="datetime-local"  step="1" id="expirationDate" name="expirationDate" defaultValue={undefined} style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} disabled/>
               )}
               <label>
                 <input 
@@ -486,9 +485,9 @@ export default function Home() {
               <input type="number" id="stock" name="stock" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"40px", width:"146px", height:"25px" }} required /><br></br>
               <label htmlFor="expirationDate">Expiration Date</label>
               {!showNewExpirationInput ? (
-              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required />
+              <input type="datetime-local"  step="1" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} required />
               ) : (
-              <input type="datetime-local"  step="60" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} disabled/>
+              <input type="datetime-local"  step="1" id="expirationDate" name="expirationDate" style={{ border:"1px solid black", marginTop:"10px", marginLeft:"10px" }} disabled/>
               )}
               <label>
                 <input 
@@ -540,7 +539,7 @@ export default function Home() {
         let expirationDate = formData.get("expirationDate") as string;
         const expirationDatePart1 = expirationDate.split('T')[0]
         const expirationDatePart2 = expirationDate.split('T')[1]
-        expirationDate = expirationDatePart1+" "+expirationDatePart2+":00";
+        expirationDate = expirationDatePart1+" "+expirationDatePart2;
         newProduct = {
           name,
           category,
@@ -566,8 +565,8 @@ export default function Home() {
     <main>
       <div
         title="SearchBlock"
-        className="mx-auto flex max-w-sm">
-        <form className="max-w-sm mx-auto border rounded-lg mt-2" onSubmit={handleSearchSubmit}>
+        className="mx-auto flex max-w-500">
+        <form className="max-w-500 mx-auto border rounded-lg mt-2" onSubmit={handleSearchSubmit}>
           <div className="mx-auto flex max-w-sm mt-5">
             <label htmlFor="name" className="ml-2">Name</label>
             <input type="text" id="name" name="name" className="flex border rounded-md mr-2 ml-auto" value={nameValue} onChange={handleNameChange}></input><br></br>
@@ -620,7 +619,7 @@ export default function Home() {
         </div>
       </div>
       <div title="CategoryMetrics">
-        <table className="table auto border rounded-md mx-auto flex max-w-200 w-auto mt-2 ">
+        <table className="table auto border rounded-md mx-auto flex max-w-200 w-175 mt-2 ">
           <thead>
             <tr>
               <th scope="col" className="border w-30">Category</th>

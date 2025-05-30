@@ -53,6 +53,9 @@ public class ProductServiceImpl implements ProductService{
         if (Objects.nonNull(product.getExpirationDate())) {
             prodDB.setExpirationDate(product.getExpirationDate());
         }
+        else{
+            prodDB.setExpirationDate(null);
+        }
 
         prodDB.setUpdateDate();
         return productRepository.save(prodDB);
@@ -88,7 +91,7 @@ public class ProductServiceImpl implements ProductService{
             if(name!=null){
                 if(categories!=null&&!categories.isEmpty()){
                     for(String category : categories){
-                        if(product.getName().equals(name)&&product.getCategory().equals(category)){
+                        if(product.getName().toLowerCase().contains(name.toLowerCase())&&product.getCategory().equals(category)){
                             switch (availability){
                                 case "Out of Stock":
                                     if(product.getStock()==0){
@@ -108,7 +111,7 @@ public class ProductServiceImpl implements ProductService{
                     }
                 }
                 else{
-                    if(product.getName().equals(name)){
+                    if(product.getName().toLowerCase().contains(name.toLowerCase())){
                         switch (availability){
                             case "Out of Stock":
                                 if(product.getStock()==0){
